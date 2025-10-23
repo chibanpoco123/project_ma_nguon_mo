@@ -3,7 +3,9 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 import productRoutes from "./src/routes/product.js"; 
 import userRoutes from "./src/routes/user.js";       
-
+import categoriesRoutes from "./src/routes/categories.js";
+import cartRoutes from "./src/routes/cartRoutes.js"; // 👈 import route giỏ hàng
+import OrderRoutes from "./src/routes/OrderRoutes.js"
 dotenv.config();
 
 const app = express();
@@ -25,7 +27,9 @@ app.get("/", (req, res) => {
 // 👉 Routes API
 app.use("/api/products", productRoutes); // số nhiều (thông thường)
 app.use("/api/users", userRoutes);       // để trùng với postman
-
+app.use("/api/categories", categoriesRoutes);
+app.use("/api/cart", cartRoutes); // 👈 đăng ký prefix
+app.use("/api/Order", OrderRoutes); // 👈 đăng ký prefix
 // 👉 Chạy server
 app.listen(PORT, () => {
   console.log(`🚀 Server chạy tại: http://localhost:${PORT}`);

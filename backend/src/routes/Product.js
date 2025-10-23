@@ -1,5 +1,6 @@
 import express from "express";
 import Product from "../models/product.js";
+import { verifyToken, isAdmin } from "../middlewares/auth.js";
 
 const router = express.Router();
 
@@ -13,8 +14,8 @@ router.get("/", async (req, res) => {
   }
 });
 
-// Thêm sản phẩm
-router.post("/", async (req, res) => {
+// Thêm sản phẩm (chỉ admin)
+router.post("/", verifyToken, isAdmin, async (req, res) => {
   try {
     const newProduct = new Product(req.body);
     const saved = await newProduct.save();
@@ -23,18 +24,9 @@ router.post("/", async (req, res) => {
     res.status(400).json({ error: err.message });
   }
 });
-// lấy chi tiết sản phẩm theo id 
-router.get("/:id",async(req,res) =>{
-    try{
-        const product = await Product.findById(req.params.id).populate("category_id");
-        if (!product) return res.status(404).json({ error: "Không tìm thấy sản phẩm" });
-    res.json(product);
-    }catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-})
-// xóa sản phẩm theo id 
-router.delete("/:id", async (req, res) => {
+
+// Xóa sản phẩm (chỉ admin)
+router.delete("/:id", verifyToken, isAdmin, async (req, res) => {
   try {
     const deletedProduct = await Product.findByIdAndDelete(req.params.id);
     if (!deletedProduct) return res.status(404).json({ error: "Không tìm thấy sản phẩm" });
@@ -43,8 +35,9 @@ router.delete("/:id", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-// sửa sản phâm theo id 
-router.put("/:id", async (req, res) => {
+
+// Sửa sản phẩm (chỉ admin)
+router.put("/:id", verifyToken, isAdmin, async (req, res) => {
   try {
     const updatedProduct = await Product.findByIdAndUpdate(
       req.params.id,
@@ -57,4 +50,4 @@ router.put("/:id", async (req, res) => {
     res.status(400).json({ error: err.message });
   }
 });
-export default router;
+export default router

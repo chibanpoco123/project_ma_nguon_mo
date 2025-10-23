@@ -6,26 +6,32 @@ import {
   getUserById,
   updateUser,
   deleteUser,
-  refreshToken
+  refreshToken,
+  createUser
 } from "../controller/usercontroller.js";
-const router = express.Router(); // ✅ phải có dòng này
+import { verifyToken, isAdmin } from "../middlewares/auth.js";
 
-// 👉 Đăng ký người dùng mới
+const router = express.Router();
+
+// 👉 Người dùng tự đăng ký
 router.post("/register", registerUser);
 
 // 👉 Đăng nhập
 router.post("/login", loginUser);
 
-// 👉 Lấy danh sách người dùng
-router.get("/", getAllUsers);
+// 🆕 👉 ADMIN tạo người dùng ()
+router.post("/create", verifyToken, isAdmin, createUser);
 
-// 👉 Lấy thông tin 1 người dùng theo ID
-router.get("/:id", getUserById);
+// 👉 Danh sách user (chỉ admin)
+router.get("/", verifyToken, isAdmin, getAllUsers);
 
-// 👉 Cập nhật thông tin người dùng
-router.put("/:id", updateUser);
+// 👉 Lấy thông tin chi tiết user
+router.get("/:id", verifyToken, getUserById);
+
+// 👉 Cập nhật thông tin (user hoặc admin)
+router.put("/:id", verifyToken, updateUser);
 
 // 👉 Xóa người dùng
-router.delete("/:id", deleteUser);\
-router.post("/refresh", refreshToken);
+router.delete("/:id", verifyToken, deleteUser);
+
 export default router;
