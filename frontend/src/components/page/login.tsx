@@ -7,35 +7,62 @@ const LoginPage: React.FC = () => {
   const [isLoginTab, setIsLoginTab] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
 
+  // Login state
   const [emailOrPhone, setEmailOrPhone] = useState("");
   const [password, setPassword] = useState("");
+
+  // Register state
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+  const [regPassword, setRegPassword] = useState("");
+
   const navigate = useNavigate();
 
   // Xử lý login
-const handleLogin = async (e: React.FormEvent) => {
-  e.preventDefault(); // tránh reload trang
-  try {
-    const res = await axios.post("http://localhost:3000/api/users/login", {
-      email: emailOrPhone,
-      password: password,
-    });
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const res = await axios.post("http://localhost:3000/api/users/login", {
+        email: emailOrPhone,
+        password: password,
+      });
 
-    console.log("Login success:");
+      console.log("Login success:", res.data);
 
-    // ✅ Lưu token & user vào localStorage
-    if (res.data.accessToken) {
-      localStorage.setItem("accessToken", res.data.accessToken);
-      localStorage.setItem("refreshToken", res.data.refreshToken);
-      localStorage.setItem("user", JSON.stringify(res.data.user));
+      if (res.data.accessToken) {
+        localStorage.setItem("accessToken", res.data.accessToken);
+        localStorage.setItem("refreshToken", res.data.refreshToken);
+        localStorage.setItem("user", JSON.stringify(res.data.user));
+      }
+
+      alert("Đăng nhập thành công!");
+      navigate("/"); // chuyển về Home
+    } catch (err: any) {
+      console.error(err.response || err);
+      alert("Đăng nhập thất bại! Vui lòng kiểm tra email/mật khẩu.");
     }
+  };
 
-    alert("Đăng nhập thành công!");
-    navigate("/"); // chuyển về Home
-  } catch (err: any) {
-    console.error(err.response || err);
-    alert("Đăng nhập thất bại! Vui lòng kiểm tra email/mật khẩu.");
-  }
-};
+  // Xử lý register
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const res = await axios.post("http://localhost:3000/api/users/register", {
+        name,
+        phone,
+        email,
+        password: regPassword,
+      });
+
+      console.log("Register success:", res.data);
+      alert("Đăng ký thành công! Vui lòng đăng nhập.");
+      setIsLoginTab(true); // chuyển sang tab login
+    } catch (err: any) {
+      console.error(err.response || err);
+      alert("Đăng ký thất bại! Vui lòng thử lại.");
+    }
+  };
 
   return (
     <div className="login-container">
@@ -94,11 +121,31 @@ const handleLogin = async (e: React.FormEvent) => {
             </a>
           </form>
         ) : (
-          <form className="form">
-            <input type="text" placeholder="Họ và tên" />
-            <input type="text" placeholder="Số điện thoại" />
-            <input type="email" placeholder="Email" />
-            <input type="password" placeholder="Mật khẩu" />
+          <form className="form" onSubmit={handleRegister}>
+            <input
+              type="text"
+              placeholder="Họ và tên"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+            <input
+              type="text"
+              placeholder="Số điện thoại"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+            />
+            <input
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+            <input
+              type="password"
+              placeholder="Mật khẩu"
+              value={regPassword}
+              onChange={(e) => setRegPassword(e.target.value)}
+            />
             <button type="submit" className="btn-login">
               ĐĂNG KÝ
             </button>
