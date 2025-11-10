@@ -7,12 +7,10 @@ export const addToCart = async (req, res) => {
   try {
     const userId = req.user.id; // từ verifyToken
     const { product_id, product_variant_id, quantity } = req.body;
-
     // Kiểm tra product_id hợp lệ
     if (!mongoose.Types.ObjectId.isValid(product_id)) {
       return res.status(400).json({ message: "sản phẩm ko hợp lệ " });
     }
-
     // Kiểm tra product_variant_id nếu có
     let variantId = null;
     if (product_variant_id) {
@@ -21,14 +19,12 @@ export const addToCart = async (req, res) => {
       }
       variantId = product_variant_id;
     }
-
     // Kiểm tra xem sản phẩm đã có trong giỏ chưa
     let cartItem = await CartItem.findOne({
       user_id: userId,
       product_id,
       product_variant_id: variantId
     });
-
     if (cartItem) {
       // Nếu đã có, tăng số lượng
       cartItem.quantity += quantity;
@@ -43,14 +39,12 @@ export const addToCart = async (req, res) => {
       });
       await cartItem.save();
     }
-
     res.status(200).json({ message: "Thêm sản phẩm vào giỏ thành công", cartItem });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Lỗi server", error: error.message });
   }
 };
-
 // 📌 Lấy giỏ hàng
 export const getCart = async (req, res) => {
   try {
@@ -64,7 +58,6 @@ export const getCart = async (req, res) => {
     res.status(500).json({ message: "Lỗi khi lấy giỏ hàng" });
   }
 };
-
 // 📌 Cập nhật số lượng
 export const updateCartItem = async (req, res) => {
   try {
@@ -84,7 +77,6 @@ export const updateCartItem = async (req, res) => {
     res.status(500).json({ message: "Lỗi khi cập nhật giỏ hàng" });
   }
 };
-
 // 📌 Xóa sản phẩm
 export const removeCartItem = async (req, res) => {
   try {
@@ -96,7 +88,6 @@ export const removeCartItem = async (req, res) => {
     res.status(500).json({ message: "Lỗi khi xóa sản phẩm" });
   }
 };
-
 // 📌 Xóa toàn bộ giỏ hàng của user
 export const clearCart = async (req, res) => {
   try {

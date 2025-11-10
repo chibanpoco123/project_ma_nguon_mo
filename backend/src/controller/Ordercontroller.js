@@ -1,15 +1,12 @@
+import { OrderedBulkOperation } from "mongodb";
 import Order from "../models/Order.js";
-import mongoose from "mongoose";
-
-// 📌 Hàm tạo mã đơn hàng tự động
+import mongoose, { overwriteMiddlewareResult } from "mongoose";
 const generateOrderNumber = () => {
   const date = new Date();
   const yyyymmdd = date.toISOString().slice(0, 10).replace(/-/g, "");
   const random = Math.floor(1000 + Math.random() * 9000);
   return `ORD${yyyymmdd}${random}`;
 };
-
-// 📦 1️⃣ Tạo đơn hàng mới
 export const createOrder = async (req, res) => {
   try {
     const user_id = req.user.id;
@@ -32,8 +29,6 @@ export const createOrder = async (req, res) => {
       shipping_method,
       customer_note,
     } = req.body;
-
-    // Kiểm tra thông tin cơ bản
     if (!customer_name || !customer_phone || !shipping_address) {
       return res.status(400).json({ message: "Thiếu thông tin người nhận" });
     }
@@ -65,8 +60,6 @@ export const createOrder = async (req, res) => {
     res.status(500).json({ message: "Lỗi khi tạo đơn hàng", error: error.message });
   }
 };
-
-// 📋 2️⃣ Lấy danh sách đơn hàng của user
 export const getUserOrders = async (req, res) => {
   try {
     const user_id = req.user.id;
@@ -77,8 +70,6 @@ export const getUserOrders = async (req, res) => {
     res.status(500).json({ message: "Lỗi khi lấy danh sách đơn hàng" });
   }
 };
-
-// 🧾 3️⃣ Lấy chi tiết 1 đơn hàng
 export const getOrderById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -95,8 +86,6 @@ export const getOrderById = async (req, res) => {
     res.status(500).json({ message: "Lỗi khi lấy chi tiết đơn hàng" });
   }
 };
-
-// 🛠️ 4️⃣ Cập nhật trạng thái đơn hàng
 export const updateOrderStatus = async (req, res) => {
   try {
     const { id } = req.params;
@@ -124,7 +113,6 @@ export const updateOrderStatus = async (req, res) => {
     res.status(500).json({ message: "Lỗi khi cập nhật đơn hàng" });
   }
 };
-// 📦 Cập nhật thông tin người nhận khi đơn còn pending
 export const updateOrderInfo = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -141,17 +129,12 @@ export const updateOrderInfo = async (req, res) => {
     const order = await Order.findById(id);
     if (!order) return res.status(404).json({ message: "Không tìm thấy đơn hàng" });
 
-    // ✅ Kiểm tra quyền
-    if (order.user_id.toString() !== userId) {
+      if (order.user_id.toString() !== userId) {
       return res.status(403).json({ message: "Bạn không có quyền sửa đơn này" });
     }
-
-    // ✅ Chỉ được sửa nếu đơn còn pending
     if (order.status !== "pending") {
       return res.status(400).json({ message: "Chỉ được chỉnh sửa khi đơn đang chờ xác nhận (pending)" });
     }
-
-    // ✅ Cập nhật thông tin
     if (customer_name) order.customer_name = customer_name;
     if (customer_phone) order.customer_phone = customer_phone;
     if (shipping_address) order.shipping_address = shipping_address;
@@ -159,9 +142,7 @@ export const updateOrderInfo = async (req, res) => {
     if (shipping_district) order.shipping_district = shipping_district;
     if (shipping_province) order.shipping_province = shipping_province;
     order.updated_at = new Date();
-
     await order.save();
-
     res.json({
       message: "Cập nhật thông tin người nhận thành công",
       order,
@@ -172,7 +153,6 @@ export const updateOrderInfo = async (req, res) => {
   }
 };
 
-// 🗑️ 5️⃣ Xóa đơn hàng
 export const deleteOrder = async (req, res) => {
   try {
     const { id } = req.params;
@@ -183,8 +163,6 @@ export const deleteOrder = async (req, res) => {
     res.status(500).json({ message: "Lỗi khi xóa đơn hàng" });
   }
 };
-
-// 🧹 6️⃣ Admin: Lấy toàn bộ đơn hàng (tất cả người dùng)
 export const getAllOrders = async (req, res) => {
   try {
     const orders = await Order.find()
@@ -197,25 +175,18 @@ export const getAllOrders = async (req, res) => {
     res.status(500).json({ message: "Lỗi khi lấy danh sách đơn hàng" });
   }
 };
-// 📌 Hủy đơn hàng (user)
 export const cancelOrder = async (req, res) => {
   try {
     const { id } = req.params;
-    const userId = req.user.id; // Lấy từ middleware verifyToken
-
-    // Tìm đơn hàng của user
+    const userId = req.user.id; 
     const order = await Order.findById(id);
 
     if (!order) {
       return res.status(404).json({ message: "Không tìm thấy đơn hàng" });
     }
-
-    // Kiểm tra quyền: chỉ chủ đơn hàng hoặc admin mới được hủy
     if (order.user_id.toString() !== userId.toString() && !req.user.isAdmin) {
       return res.status(403).json({ message: "Không có quyền hủy đơn hàng này" });
     }
-
-    // Chỉ cho phép hủy khi trạng thái là 'pending'
     if (order.status !== "pending") {
       return res.status(400).json({
         message: "Chỉ có thể hủy đơn hàng khi trạng thái là 'pending'",
@@ -223,7 +194,6 @@ export const cancelOrder = async (req, res) => {
       });
     }
 
-    // Cập nhật trạng thái
     order.status = "cancelled";
     order.cancelled_at = new Date();
     await order.save();
