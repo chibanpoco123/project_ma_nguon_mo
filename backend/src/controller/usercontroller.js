@@ -32,8 +32,6 @@ export const createUser = async (req, res) => {
     res.status(500).json({ message: "Lỗi server khi tạo người dùng" });
   }
 };
-
-// 🔹 Đăng ký
 export const registerUser = async (req, res) => {
   try {
     const { name, email, password } = req.body;
@@ -48,8 +46,6 @@ export const registerUser = async (req, res) => {
     res.status(500).json({ message: "Lỗi server", error: err.message });
   }
 };
-
-// 🔹 Đăng nhập
 export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -69,15 +65,13 @@ export const loginUser = async (req, res) => {
         id: user._id,
         name: user.name,
         email: user.email,
-        role: user.role, // 👈 thêm dòng này
+        role: user.role, 
       },
     });
   } catch (err) {
     res.status(500).json({ message: "Lỗi server", error: err.message });
   }
 };
-
-// 🔹 Refresh Token
 export const refreshToken = (req, res) => {
   try {
     const { token } = req.body;
@@ -94,23 +88,19 @@ export const refreshToken = (req, res) => {
   }
 };
 
-// 🔹 Lấy danh sách người dùng
 export const getAllUsers = async (req, res) => {
   const users = await User.find().select("-password");
   res.json(users);
 };
 
-// 🔹 Lấy user theo ID
 export const getUserById = async (req, res) => {
   const user = await User.findById(req.params.id).select("-password");
   if (!user) return res.status(404).json({ message: "Không tìm thấy người dùng" });
   res.json(user);
 };
 
-// 🔹 Cập nhật user
 export const updateUser = async (req, res) => {
   try {
-    // Nếu không phải admin, chỉ cho phép sửa chính mình
     if (req.user.role !== "admin" && req.user.id !== req.params.id) {
       return res.status(403).json({ message: "Bạn không có quyền sửa người khác" });
     }
@@ -126,9 +116,6 @@ export const updateUser = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
-
-// 🔹 Xóa user
 export const deleteUser = async (req, res) => {
   await User.findByIdAndDelete(req.params.id);
   res.json({ message: "Đã xóa người dùng" });

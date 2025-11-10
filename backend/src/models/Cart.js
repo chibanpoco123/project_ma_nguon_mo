@@ -9,7 +9,6 @@ const cartItemSchema = new mongoose.Schema({
   updated_at: { type: Date, default: Date.now }
 });
 
-// 1 user không thêm trùng sản phẩm + variant
 cartItemSchema.index({ user_id: 1, product_id: 1, product_variant_id: 1 }, { unique: true });
 
 export default mongoose.model("CartItem", cartItemSchema);
