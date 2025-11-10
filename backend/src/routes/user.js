@@ -12,11 +12,8 @@ import {
 import { verifyToken, isAdmin } from "../middlewares/auth.js";
 
 const router = express.Router();
-
-// 👉 Người dùng tự đăng ký
 router.post("/register", registerUser);
 
-// 👉 Đăng nhập
 router.post("/login", loginUser);
 
 // 🆕 👉 ADMIN tạo người dùng ()
