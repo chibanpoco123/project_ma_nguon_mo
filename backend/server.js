@@ -12,6 +12,7 @@ import couponRoutes from "./src/routes/cupponroutes.js"
 import PaymentRoutes from "./src/routes/payments.js";
 import ShippingRoutes from "./src/routes/shiping.js";
 import Wishlist from "./src/routes/wishlist.js";
+import socialAuthRoutes from "./src/routes/socialauth.js";
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -37,6 +38,7 @@ app.use("/api/coupons", couponRoutes);
 app.use("api/payments",PaymentRoutes)
 app.use("api/Shipping",ShippingRoutes)
 app.use("api/whishlist",Wishlist)
+app.use("/api/auth/social", socialAuthRoutes);
 app.listen(PORT, () => {
   console.log(`🚀 Server chạy tại: http://localhost:${PORT}`);
 });
