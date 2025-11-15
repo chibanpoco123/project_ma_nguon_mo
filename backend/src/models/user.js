@@ -16,12 +16,22 @@ const userSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      required: [true, "Mật khẩu là bắt buộc"],
+      required: false,
       minlength: [6, "Mật khẩu ít nhất 6 ký tự"],
     },
     phone: {
       type: String,
       trim: true,
+    },
+    googleId: {
+      type: String,
+      unique: true,
+      sparse: true,
+    },
+    facebookId: {
+      type: String,
+      unique: true,
+      sparse: true,
     },
 
     address: {
