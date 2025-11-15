@@ -129,78 +129,115 @@ const AdminDatabase: React.FC = () => {
         )}
 
         {health && (
-          <Card className="mb-4">
-            <Card.Header className="d-flex justify-content-between align-items-center">
-              <h5 className="mb-0">Trạng thái Health Check</h5>
+          <Card className={`mb-4 ${health.healthy ? 'border-success' : 'border-danger'}`}>
+            <Card.Header className={`d-flex justify-content-between align-items-center ${health.healthy ? 'bg-success bg-opacity-10' : 'bg-danger bg-opacity-10'}`}>
+              <h5 className="mb-0">🔍 Trạng thái Health Check</h5>
               {getHealthBadge(health.healthy)}
             </Card.Header>
             <Card.Body>
-              <p><strong>Trạng thái:</strong> {health.status}</p>
-              <p><strong>Thông báo:</strong> {health.message}</p>
-              {health.timestamp && (
-                <p className="text-muted small">
-                  <strong>Kiểm tra lúc:</strong> {new Date(health.timestamp).toLocaleString('vi-VN')}
-                </p>
-              )}
+              <div className="row">
+                <div className="col-md-6">
+                  <p><strong>Trạng thái:</strong> 
+                    <Badge bg={health.healthy ? 'success' : 'danger'} className="ms-2">
+                      {health.status}
+                    </Badge>
+                  </p>
+                  <p><strong>Thông báo:</strong> {health.message}</p>
+                </div>
+                <div className="col-md-6">
+                  {health.timestamp && (
+                    <p className="text-muted small">
+                      <strong>Kiểm tra lúc:</strong><br />
+                      {new Date(health.timestamp).toLocaleString('vi-VN')}
+                    </p>
+                  )}
+                </div>
+              </div>
             </Card.Body>
           </Card>
         )}
 
         {dbInfo && (
           <>
-            <Card className="mb-4">
-              <Card.Header className="d-flex justify-content-between align-items-center">
-                <h5 className="mb-0">Thông tin kết nối</h5>
+            <Card className={`mb-4 ${dbInfo.isConnected ? 'border-success' : 'border-danger'}`}>
+              <Card.Header className={`d-flex justify-content-between align-items-center ${dbInfo.isConnected ? 'bg-success bg-opacity-10' : 'bg-danger bg-opacity-10'}`}>
+                <h5 className="mb-0">🔌 Thông tin kết nối MongoDB</h5>
                 {getStatusBadge(dbInfo.isConnected)}
               </Card.Header>
               <Card.Body>
+                {!dbInfo.isConnected && (
+                  <Alert variant="warning" className="mb-3">
+                    <strong>⚠️ Cảnh báo:</strong> MongoDB chưa kết nối. Vui lòng kiểm tra:
+                    <ul className="mb-0 mt-2">
+                      <li>MONGO_URI trong file .env có đúng không?</li>
+                      <li>MongoDB server có đang chạy không?</li>
+                      <li>Network connection có ổn định không?</li>
+                    </ul>
+                  </Alert>
+                )}
                 <div className="row">
                   <div className="col-md-6 mb-3">
-                    <p><strong>Trạng thái:</strong> {dbInfo.state}</p>
-                    <p><strong>Database Name:</strong> {dbInfo.database.name}</p>
-                    <p><strong>Host:</strong> {dbInfo.database.host}</p>
-                    <p><strong>Port:</strong> {dbInfo.database.port}</p>
+                    <p>
+                      <strong>Trạng thái kết nối:</strong> 
+                      <Badge bg={dbInfo.isConnected ? 'success' : 'danger'} className="ms-2">
+                        {dbInfo.state}
+                      </Badge>
+                    </p>
+                    <p><strong>📊 Database Name:</strong> <code>{dbInfo.database.name}</code></p>
+                    <p><strong>🌐 Host:</strong> <code>{dbInfo.database.host}</code></p>
+                    <p><strong>🔌 Port:</strong> <code>{dbInfo.database.port}</code></p>
                   </div>
                   <div className="col-md-6 mb-3">
-                    <p><strong>Connection String:</strong></p>
+                    <p><strong>🔗 Connection String:</strong></p>
                     <code className="database-connection-string">
                       {dbInfo.connectionString}
                     </code>
                     <p className="text-muted small mt-2">
-                      <em>Lưu ý: Thông tin đăng nhập đã được ẩn vì lý do bảo mật</em>
+                      <em>🔒 Lưu ý: Thông tin đăng nhập đã được ẩn vì lý do bảo mật</em>
                     </p>
                   </div>
                 </div>
                 {dbInfo.timestamp && (
-                  <p className="text-muted small mb-0">
-                    <strong>Cập nhật lúc:</strong> {new Date(dbInfo.timestamp).toLocaleString('vi-VN')}
-                  </p>
+                  <div className="mt-3 pt-3 border-top">
+                    <p className="text-muted small mb-0">
+                      <strong>🕐 Cập nhật lúc:</strong> {new Date(dbInfo.timestamp).toLocaleString('vi-VN')}
+                    </p>
+                  </div>
                 )}
               </Card.Body>
             </Card>
 
-            <Card>
-              <Card.Header>
-                <h5 className="mb-0">Collections trong Database</h5>
-              </Card.Header>
-              <Card.Body>
-                <p><strong>Tổng số collections:</strong> {dbInfo.database.collectionsCount}</p>
-                {dbInfo.database.collections.length > 0 ? (
-                  <div className="mt-3">
-                    <h6>Danh sách collections:</h6>
-                    <div className="d-flex flex-wrap gap-2">
-                      {dbInfo.database.collections.map((collection, index) => (
-                        <Badge key={index} bg="info" style={{ fontSize: '0.9rem', padding: '0.5rem' }}>
-                          {collection}
-                        </Badge>
-                      ))}
+            {dbInfo.isConnected && (
+              <Card>
+                <Card.Header className="bg-info bg-opacity-10">
+                  <h5 className="mb-0">📚 Collections trong Database</h5>
+                </Card.Header>
+                <Card.Body>
+                  <p>
+                    <strong>Tổng số collections:</strong> 
+                    <Badge bg="info" className="ms-2" style={{ fontSize: '1rem' }}>
+                      {dbInfo.database.collectionsCount}
+                    </Badge>
+                  </p>
+                  {dbInfo.database.collections.length > 0 ? (
+                    <div className="mt-3">
+                      <h6>Danh sách collections:</h6>
+                      <div className="d-flex flex-wrap gap-2 mt-2">
+                        {dbInfo.database.collections.map((collection, index) => (
+                          <Badge key={index} bg="info" style={{ fontSize: '0.9rem', padding: '0.5rem 0.75rem' }}>
+                            📄 {collection}
+                          </Badge>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                ) : (
-                  <p className="text-muted">Không có collections nào</p>
-                )}
-              </Card.Body>
-            </Card>
+                  ) : (
+                    <Alert variant="info" className="mt-3">
+                      Không có collections nào trong database
+                    </Alert>
+                  )}
+                </Card.Body>
+              </Card>
+            )}
           </>
         )}
       </Container>

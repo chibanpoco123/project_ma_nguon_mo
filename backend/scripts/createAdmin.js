@@ -15,24 +15,31 @@ async function createAdmin() {
     await mongoose.connect(process.env.MONGO_URI);
     console.log("✅ Đã kết nối MongoDB");
 
-    // Kiểm tra xem admin đã tồn tại chưa
-    const existingAdmin = await User.findOne({ email: ADMIN_EMAIL });
+    // Kiểm tra xem admin đã tồn tại chưa (normalize email)
+    const normalizedEmail = ADMIN_EMAIL.toLowerCase().trim();
+    const existingAdmin = await User.findOne({ 
+      $or: [
+        { email: normalizedEmail },
+        { email: ADMIN_EMAIL }
+      ]
+    });
     
     if (existingAdmin) {
       console.log("⚠️  Tài khoản admin đã tồn tại!");
       console.log(`   Email: ${existingAdmin.email}`);
       console.log(`   Role: ${existingAdmin.role}`);
       console.log("\n💡 Nếu muốn đặt lại mật khẩu, hãy xóa tài khoản này và chạy lại script.");
+      console.log("   Hoặc cập nhật mật khẩu trong database.");
       process.exit(0);
     }
 
     // Tạo mật khẩu đã hash
     const hashedPassword = await bcrypt.hash(ADMIN_PASSWORD, 10);
 
-    // Tạo tài khoản admin
+    // Tạo tài khoản admin (normalize email)
     const admin = new User({
       name: ADMIN_NAME,
-      email: ADMIN_EMAIL,
+      email: ADMIN_EMAIL.toLowerCase().trim(),
       password: hashedPassword,
       role: "admin",
       is_active: true,
