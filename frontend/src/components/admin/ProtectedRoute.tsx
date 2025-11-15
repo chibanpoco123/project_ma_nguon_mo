@@ -33,7 +33,18 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
         try {
           const user = JSON.parse(userStr);
           const isAdminEmail = user.email && user.email.toLowerCase() === 'admin@icondenim.com';
-          setIsAdmin(user.role === 'admin' && isAdminEmail);
+          const hasAdminRole = user.role === 'admin';
+          
+          // Debug logging
+          console.log('🔍 Admin Check:', {
+            email: user.email,
+            role: user.role,
+            isAdminEmail,
+            hasAdminRole,
+            result: isAdminEmail && hasAdminRole
+          });
+          
+          setIsAdmin(isAdminEmail && hasAdminRole);
         } catch (err) {
           console.error('Error parsing user data:', err);
           setIsAdmin(false);
@@ -82,17 +93,40 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   // Redirect if admin required but user is not admin
   if (requireAdmin && !isAdmin) {
+    const userStr = localStorage.getItem('user');
+    let userInfo = 'Không có thông tin';
+    try {
+      if (userStr) {
+        const user = JSON.parse(userStr);
+        userInfo = `Email: ${user.email || 'N/A'}, Role: ${user.role || 'N/A'}`;
+      }
+    } catch (e) {
+      userInfo = 'Lỗi đọc thông tin user';
+    }
+
     return (
       <div className="protected-route-error">
         <h2>⚠️ Không có quyền truy cập</h2>
         <p>Chỉ tài khoản <strong>admin@icondenim.com</strong> mới có quyền truy cập trang quản trị.</p>
-        <p className="text-muted">Vui lòng đăng nhập với email quản trị viên để tiếp tục.</p>
-        <button 
-          className="btn btn-primary"
-          onClick={() => window.location.href = '/'}
-        >
-          Về trang chủ
-        </button>
+        <div className="alert alert-info mt-3">
+          <strong>Thông tin tài khoản hiện tại:</strong><br />
+          <code>{userInfo}</code>
+        </div>
+        <p className="text-muted mt-3">Vui lòng đăng nhập với email <strong>admin@icondenim.com</strong> để tiếp tục.</p>
+        <div className="mt-3">
+          <button 
+            className="btn btn-primary me-2"
+            onClick={() => window.location.href = '/login'}
+          >
+            Đăng nhập lại
+          </button>
+          <button 
+            className="btn btn-secondary"
+            onClick={() => window.location.href = '/'}
+          >
+            Về trang chủ
+          </button>
+        </div>
       </div>
     );
   }

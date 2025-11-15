@@ -7,6 +7,7 @@ import AdminDashboard from '../components/admin/AdminDashboard';
 import AdminProducts from '../components/admin/AdminProducts';
 import AdminDatabase from '../components/admin/AdminDatabase';
 import AdminUsers from '../components/admin/AdminUsers';
+import AdminDebug from '../components/admin/AdminDebug';
 import ProtectedRoute from '../components/admin/ProtectedRoute';
 
 function AppRoutes() {
@@ -15,6 +16,7 @@ function AppRoutes() {
       <Route path="/" element={<Home />} />
       <Route path="/login" element={<Login />} />
       <Route path="/cart" element={<Cart />} />
+      <Route path="/debug" element={<AdminDebug />} />
       
       {/* Admin Routes - Protected */}
       <Route 
