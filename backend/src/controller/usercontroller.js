@@ -34,14 +34,36 @@ export const createUser = async (req, res) => {
 };
 export const registerUser = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, phone } = req.body;
     const existing = await User.findOne({ email });
     if (existing) return res.status(400).json({ message: "Email đã tồn tại" });
 
     const hashed = await bcrypt.hash(password, 10);
-    const user = new User({ name, email, password: hashed });
+    
+    // Chỉ email admin@icondenim.com mới được cấp quyền admin
+    let role = "customer";
+    if (email && email.toLowerCase() === "admin@icondenim.com") {
+      role = "admin";
+    }
+
+    const user = new User({ 
+      name, 
+      email, 
+      password: hashed,
+      phone: phone || "",
+      role 
+    });
     await user.save();
-    res.status(201).json({ message: "Đăng ký thành công", user });
+    res.status(201).json({ 
+      message: "Đăng ký thành công", 
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        phone: user.phone
+      }
+    });
   } catch (err) {
     res.status(500).json({ message: "Lỗi server", error: err.message });
   }

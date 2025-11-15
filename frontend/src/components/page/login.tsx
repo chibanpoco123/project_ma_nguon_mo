@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import "../../assets/css/login.css";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const LoginPage: React.FC = () => {
   const [isLoginTab, setIsLoginTab] = useState(true);
@@ -18,6 +18,7 @@ const LoginPage: React.FC = () => {
   const [regPassword, setRegPassword] = useState("");
 
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Xử lý login
   const handleLogin = async (e: React.FormEvent) => {
@@ -37,7 +38,10 @@ const LoginPage: React.FC = () => {
       }
 
       alert("Đăng nhập thành công!");
-      navigate("/"); // chuyển về Home
+      
+      // Check if there's a redirect path from protected route
+      const from = (location.state as any)?.from?.pathname || "/";
+      navigate(from); // chuyển về trang trước đó hoặc Home
     } catch (err: any) {
       console.error(err.response || err);
       alert("Đăng nhập thất bại! Vui lòng kiểm tra email/mật khẩu.");
@@ -56,11 +60,36 @@ const LoginPage: React.FC = () => {
       });
 
       console.log("Register success:", res.data);
-      alert("Đăng ký thành công! Vui lòng đăng nhập.");
-      setIsLoginTab(true); // chuyển sang tab login
+      
+      // Chỉ email admin@icondenim.com mới được cấp quyền admin
+      const isAdminEmail = email.toLowerCase() === "admin@icondenim.com";
+      
+      if (isAdminEmail && res.data.user?.role === "admin") {
+        // Tự động đăng nhập nếu đăng ký với admin@icondenim.com
+        const loginRes = await axios.post("http://localhost:3000/api/users/login", {
+          email: email,
+          password: regPassword,
+        });
+
+        if (loginRes.data.accessToken) {
+          localStorage.setItem("accessToken", loginRes.data.accessToken);
+          localStorage.setItem("refreshToken", loginRes.data.refreshToken);
+          localStorage.setItem("user", JSON.stringify(loginRes.data.user));
+        }
+
+        alert("Đăng ký thành công! Bạn đã được cấp quyền quản trị viên. Đang chuyển đến trang quản trị...");
+        
+        // Check if there's a redirect path from protected route
+        const from = (location.state as any)?.from?.pathname || "/admin";
+        navigate(from);
+      } else {
+        alert("Đăng ký thành công! Vui lòng đăng nhập.");
+        setIsLoginTab(true); // chuyển sang tab login
+      }
     } catch (err: any) {
       console.error(err.response || err);
-      alert("Đăng ký thất bại! Vui lòng thử lại.");
+      const errorMessage = err.response?.data?.message || "Đăng ký thất bại! Vui lòng thử lại.";
+      alert(errorMessage);
     }
   };
 
@@ -127,6 +156,7 @@ const LoginPage: React.FC = () => {
               placeholder="Họ và tên"
               value={name}
               onChange={(e) => setName(e.target.value)}
+              required
             />
             <input
               type="text"
@@ -139,12 +169,27 @@ const LoginPage: React.FC = () => {
               placeholder="Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              required
             />
+            {email.toLowerCase() === "admin@icondenim.com" && (
+              <div style={{
+                padding: "0.5rem",
+                backgroundColor: "#e3f2fd",
+                borderRadius: "4px",
+                fontSize: "0.85rem",
+                color: "#1976d2",
+                marginBottom: "0.5rem"
+              }}>
+                ℹ️ Email này sẽ được cấp quyền quản trị viên
+              </div>
+            )}
             <input
               type="password"
               placeholder="Mật khẩu"
               value={regPassword}
               onChange={(e) => setRegPassword(e.target.value)}
+              required
+              minLength={6}
             />
             <button type="submit" className="btn-login">
               ĐĂNG KÝ
