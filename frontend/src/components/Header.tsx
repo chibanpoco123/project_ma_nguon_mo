@@ -8,8 +8,9 @@
     return (
       <Navbar bg="white" expand="lg" className="sticky-top border-bottom">
         <Container fluid className="px-md-5">
-          <Navbar.Brand href="#home" className="fw-bolder">ICON DENIM</Navbar.Brand>
-          <Navbar.Toggle aria-controls="main-nav" />
+<Navbar.Brand as={Link} to="/" className="fw-bolder">
+  ICON DENIM
+</Navbar.Brand>          <Navbar.Toggle aria-controls="main-nav" />
           <Navbar.Collapse id="main-nav">
             <Nav className="mx-auto">
               <Nav.Link href="#products">Sản phẩm</Nav.Link>

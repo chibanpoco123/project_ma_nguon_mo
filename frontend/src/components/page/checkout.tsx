@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import "../../assets/css/checkout.css";
 import axios from "axios";
-import momo from "../../assets/icon/Payment By Momo.png"
-import vvnpay from "../../assets/icon/Payment By ATM.png"
+import momo from "../../assets/icon/Payment By Momo.png";
+import vvnpay from "../../assets/icon/Payment By ATM.png";
+
 interface CartItem {
   _id: string;
   quantity: number;
@@ -33,6 +34,12 @@ const Checkout: React.FC = () => {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [subtotal, setSubtotal] = useState(0);
 
+  // --------- Lưu thông tin khách hàng ----------
+  const [customerName, setCustomerName] = useState("");
+  const [customerPhone, setCustomerPhone] = useState("");
+  const [address, setAddress] = useState("");
+  const [note, setNote] = useState("");
+
   // --------- Tỉnh/Quận/Xã ----------
   const [provinces, setProvinces] = useState<Province[]>([]);
   const [districts, setDistricts] = useState<District[]>([]);
@@ -60,6 +67,7 @@ const Checkout: React.FC = () => {
           const price = item.product_id?.price ?? 0;
           return sum + price * item.quantity;
         }, 0);
+
         setSubtotal(total);
       })
       .catch((err) => console.error("API Error:", err));
@@ -97,6 +105,69 @@ const Checkout: React.FC = () => {
       .catch((err) => console.error(err));
   };
 
+  // --------- Tạo đơn hàng ----------
+  const handlePayment = async () => {
+       const token = localStorage.getItem("accessToken");  // 👈 Lấy token tại đây
+
+    if (!token) {
+      alert("Bạn chưa đăng nhập!");
+      return;
+    }
+    if (!customerName || !customerPhone || !address || !selectedWard) {
+      alert("Vui lòng nhập đầy đủ thông tin giao hàng!");
+      return;
+    }
+
+    if (cart.length === 0) {
+      alert("Giỏ hàng trống!");
+      return;
+    }
+
+    const orderData = {
+      customer_name: customerName,
+      customer_phone: customerPhone,
+      shipping_address: address,
+      shipping_ward: selectedWard,
+      shipping_district: selectedDistrict,
+      shipping_province: selectedProvince,
+      note: note,
+      payment_method: payment,
+
+      items: cart.map((item) => ({
+        product_id: item.product_id?._id,
+        name: item.product_id?.name,
+        price: item.product_id?.price,
+        quantity: item.quantity,
+        image: item.product_id?.images[0]
+      })),
+
+      subtotal: subtotal,
+      shipping_fee: 0,
+      discount: 0,
+      total_price: subtotal,
+    };
+
+    try {
+      const res = await axios.post(
+        "http://localhost:3000/api/Order/",
+        orderData,
+          {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  }
+        
+      );
+
+      alert("Đặt hàng thành công!");
+      console.log("ORDER CREATED:", res.data);
+
+    } catch (err: any) {
+      console.error(err);
+      alert("Đặt hàng thất bại!");
+    }
+  };
+
   // --------- Xử lý ảnh ----------
   const getImageUrl = (img: string | undefined) => {
     if (!img) return "/no-image.png";
@@ -110,10 +181,28 @@ const Checkout: React.FC = () => {
       {/* LEFT */}
       <div className="checkout-left">
         <h3>Thông tin đơn hàng</h3>
+
         <div className="form-group">
-          <input type="text" placeholder="Họ và tên" />
-          <input type="text" placeholder="Số điện thoại" />
-          <input type="text" placeholder="Địa chỉ" />
+          <input
+            type="text"
+            placeholder="Họ và tên"
+            value={customerName}
+            onChange={(e) => setCustomerName(e.target.value)}
+          />
+
+          <input
+            type="text"
+            placeholder="Số điện thoại"
+            value={customerPhone}
+            onChange={(e) => setCustomerPhone(e.target.value)}
+          />
+
+          <input
+            type="text"
+            placeholder="Địa chỉ (Số nhà, đường)"
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
+          />
 
           {/* Tỉnh/Quận/Xã */}
           <select
@@ -132,7 +221,7 @@ const Checkout: React.FC = () => {
             value={selectedDistrict}
             onChange={(e) => handleDistrictChange(e.target.value)}
           >
-            <option value="">Chọn Quận/huyện</option>
+            <option value="">Chọn Quận/Huyện</option>
             {districts.map((d) => (
               <option key={d.code} value={d.code}>
                 {d.name}
@@ -144,7 +233,7 @@ const Checkout: React.FC = () => {
             value={selectedWard}
             onChange={(e) => setSelectedWard(e.target.value)}
           >
-            <option value="">Chọn Phường/xã</option>
+            <option value="">Chọn Phường/Xã</option>
             {wards.map((w) => (
               <option key={w.code} value={w.code}>
                 {w.name}
@@ -152,9 +241,14 @@ const Checkout: React.FC = () => {
             ))}
           </select>
 
-          <textarea placeholder="Yêu cầu giao hàng"></textarea>
+          <textarea
+            placeholder="Yêu cầu giao hàng"
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+          ></textarea>
         </div>
 
+        {/* PHƯƠNG THỨC THANH TOÁN */}
         <h3>Hình thức thanh toán</h3>
         <div className="payment-box">
           <label className="pay-option">
@@ -174,7 +268,7 @@ const Checkout: React.FC = () => {
               checked={payment === "VNPAY"}
               onChange={() => setPayment("VNPAY")}
             />
-            <img src= {vvnpay   } alt="" />
+            <img src={vvnpay} alt="" />
             <span>Thanh toán VNPay</span>
           </label>
 
@@ -194,6 +288,7 @@ const Checkout: React.FC = () => {
       {/* RIGHT */}
       <div className="checkout-right">
         <h3>Giỏ hàng</h3>
+
         {cart.length === 0 ? (
           <p>Giỏ hàng trống...</p>
         ) : (
@@ -246,7 +341,9 @@ const Checkout: React.FC = () => {
           </div>
         </div>
 
-        <button className="btn-pay">Thanh toán</button>
+        <button className="btn-pay" onClick={handlePayment}>
+          Thanh toán
+        </button>
       </div>
     </div>
   );

@@ -57,3 +57,80 @@ export const deletePayment = async (req, res) => {
     res.status(500).json({ message: "Xoá thất bại", error });
   }
 };
+export const createMomoPayment = async (req, res) => {
+  try {
+    const partnerCode = "MOMO";
+    const accessKey = "F8BBA842ECF85";
+    const secretKey = "K951B6PE1waDMi640xX08PD3vg6EkVlz";
+
+    const requestId = partnerCode + new Date().getTime();
+    const orderId = requestId;
+    const orderInfo = "pay with MoMo";
+
+    const redirectUrl = "https://momo.vn/return";
+    const ipnUrl = "https://callback.url/notify";
+
+    const amount = req.body.amount || "50000";
+    const extraData = "";
+    const requestType = "captureWallet";
+
+    // RAW SIGNATURE
+    const rawSignature =
+      `accessKey=${accessKey}&amount=${amount}&extraData=${extraData}` +
+      `&ipnUrl=${ipnUrl}&orderId=${orderId}&orderInfo=${orderInfo}` +
+      `&partnerCode=${partnerCode}&redirectUrl=${redirectUrl}` +
+      `&requestId=${requestId}&requestType=${requestType}`;
+
+    // SIGNATURE
+    const signature = crypto
+      .createHmac("sha256", secretKey)
+      .update(rawSignature)
+      .digest("hex");
+
+    const requestBody = JSON.stringify({
+      partnerCode,
+      accessKey,
+      requestId,
+      amount,
+      orderId,
+      orderInfo,
+      redirectUrl,
+      ipnUrl,
+      extraData,
+      requestType,
+      signature,
+      lang: "vi"
+    });
+
+    // HTTP REQUEST
+    const options = {
+      hostname: "test-payment.momo.vn",
+      port: 443,
+      path: "/v2/gateway/api/create",
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Content-Length": Buffer.byteLength(requestBody)
+      }
+    };
+
+    const momoReq = https.request(options, momoRes => {
+      let data = "";
+      momoRes.on("data", chunk => data += chunk);
+      momoRes.on("end", () => {
+        const response = JSON.parse(data);
+        return res.json(response);
+      });
+    });
+
+    momoReq.on("error", (e) => {
+      return res.status(500).json({ message: "Lỗi MoMo", error: e });
+    });
+
+    momoReq.write(requestBody);
+    momoReq.end();
+
+  } catch (error) {
+    res.status(500).json({ message: "Lỗi MoMo server", error });
+  }
+};
