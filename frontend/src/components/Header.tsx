@@ -2,7 +2,7 @@
   import { Navbar, Container, Nav } from 'react-bootstrap';
   import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
   import { faSearch, faUser, faShoppingBag } from '@fortawesome/free-solid-svg-icons';
-  import { Link } from "react-router-dom"; // 🟢 THÊM DÒNG NÀY
+  import { Link } from "react-router-dom";
 
   function Header() {
     return (
@@ -23,7 +23,7 @@
             <div className="d-flex align-items-center">
               <a href="#search" className="nav-icon"><FontAwesomeIcon icon={faSearch} /></a>
               <a href="#user" className="nav-icon"><FontAwesomeIcon icon={faUser} /></a>
-              <a href="#cart" className="nav-icon"><FontAwesomeIcon icon={faShoppingBag} /></a>
+              <Link to="/cart" className="nav-icon"><FontAwesomeIcon icon={faShoppingBag} /></Link>
               <Link to="/login"><button> đăng nhập </button></Link>
             </div>
           </Navbar.Collapse>
