@@ -13,11 +13,13 @@ import PaymentRoutes from "./src/routes/payments.js";
 import ShippingRoutes from "./src/routes/shiping.js";
 import Wishlist from "./src/routes/wishlist.js";
 import socialAuthRoutes from "./src/routes/socialauth.js";
+
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
+
 app.use(cors({
-  origin: "http://localhost:5173",
+  origin: ['http://localhost:5173', 'http://localhost:3000'],
   credentials: true
 }));
 
@@ -39,6 +41,7 @@ app.use("api/payments",PaymentRoutes)
 app.use("api/Shipping",ShippingRoutes)
 app.use("api/whishlist",Wishlist)
 app.use("/api/auth/social", socialAuthRoutes);
+
 app.listen(PORT, () => {
   console.log(`🚀 Server chạy tại: http://localhost:${PORT}`);
 });
