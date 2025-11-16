@@ -3,6 +3,7 @@ import "../../assets/css/login.css";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import tokenManager from "../../utils/tokenManager";
+import ForgotPasswordModal from "../ForgotPasswordModal";
 
 interface GoogleAccount {
   initialize: (config: Record<string, unknown>) => void;
@@ -59,6 +60,9 @@ const LoginPage: React.FC = () => {
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [regPassword, setRegPassword] = useState("");
+
+  // Forgot Password Modal state
+  const [showForgotModal, setShowForgotModal] = useState(false);
 
   const navigate = useNavigate();
 
@@ -257,6 +261,11 @@ const LoginPage: React.FC = () => {
     }
   };
 
+  // 🔹 Xử lý quên mật khẩu (deprecated - moved to ForgotPasswordModal component)
+  // const handleForgotPassword = async (e: React.FormEvent) => {
+  // This function is now handled in ForgotPasswordModal component
+  // };
+
 return (
     <div className="login-container">
       
@@ -309,9 +318,20 @@ return (
             <button type="submit" className="btn-login">
               ĐĂNG NHẬP
             </button>
-            <a href="/forgot-password" className="forgot">
+            <button
+              type="button"
+              onClick={() => setShowForgotModal(true)}
+              className="forgot"
+              style={{
+                background: "none",
+                border: "none",
+                color: "#d4a574",
+                cursor: "pointer",
+                textDecoration: "underline",
+              }}
+            >
               Quên mật khẩu?
-            </a>
+            </button>
 
             {/* 🔹 Social Login */}
             <div style={{ marginTop: "20px", textAlign: "center" }}>
@@ -369,6 +389,16 @@ return (
           </form>
         )}
       </div>
+
+      {/* 🔹 Forgot Password Modal Component */}
+      <ForgotPasswordModal
+        isOpen={showForgotModal}
+        onClose={() => setShowForgotModal(false)}
+        onSuccess={() => {
+          // Optional: Do something after successful password reset request
+          console.log("✅ Password reset email sent successfully");
+        }}
+      />
     </div>
   );
 };
