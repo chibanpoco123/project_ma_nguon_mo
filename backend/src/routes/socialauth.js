@@ -9,10 +9,10 @@ import {
 const router = express.Router();
 
 // Google OAuth
-router.get("/google/callback", googleCallback);
+router.post('/google/callback', googleCallback);
 
 // Facebook OAuth
-router.get("/facebook/callback", facebookCallback);
+router.post('/facebook/callback', facebookCallback);
 
 // Check if user is logged in
 router.get("/check", socialLoginSuccess);

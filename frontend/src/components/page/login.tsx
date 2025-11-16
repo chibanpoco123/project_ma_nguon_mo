@@ -73,6 +73,8 @@ const LoginPage: React.FC = () => {
           picture: string;
         };
 
+        console.log("Decoded Google response:", decoded);
+
         const res = await axios.post(
           "http://localhost:3000/api/auth/social/google/callback",
           {
@@ -83,14 +85,26 @@ const LoginPage: React.FC = () => {
           }
         );
 
-        tokenManager.setTokens(res.data.accessToken, res.data.refreshToken);
-        tokenManager.setUser(res.data.user);
+        console.log("Backend response:", res.data);
 
-        alert("Đăng nhập Google thành công!");
-        navigate("/");
+        if (res.data.accessToken) {
+          tokenManager.setTokens(res.data.accessToken, res.data.refreshToken);
+          tokenManager.setUser(res.data.user);
+          alert("Đăng nhập Google thành công!");
+          navigate("/");
+        }
       } catch (error: unknown) {
-        console.error("Google login error:", error);
-        alert("Lỗi đăng nhập Google!");
+        if (error instanceof Error) {
+          console.error("Google login error:", error.message);
+          alert("Lỗi đăng nhập Google: " + error.message);
+        } else if (error && typeof error === 'object' && 'response' in error) {
+          const axiosError = error as { response?: { data?: { message?: string } } };
+          console.error("Backend error:", axiosError.response?.data?.message);
+          alert("Lỗi từ server: " + (axiosError.response?.data?.message || "Không xác định"));
+        } else {
+          console.error("Google login error:", error);
+          alert("Lỗi đăng nhập Google!");
+        }
       }
     },
     [navigate]
@@ -207,9 +221,8 @@ const LoginPage: React.FC = () => {
       console.log("Login success:", res.data);
 
       if (res.data.accessToken) {
-        localStorage.setItem("accessToken", res.data.accessToken);
-        localStorage.setItem("refreshToken", res.data.refreshToken);
-        localStorage.setItem("user", JSON.stringify(res.data.user));
+        tokenManager.setTokens(res.data.accessToken, res.data.refreshToken);
+        tokenManager.setUser(res.data.user);
       }
 
       alert("Đăng nhập thành công!");
@@ -290,7 +303,7 @@ return (
                 className="toggle-password"
                 onClick={() => setShowPassword(!showPassword)}
               >
-                {showPassword ? "👁️" : "🙈"}
+                {showPassword ? "🙉" : "🙈"}
               </span>
             </div>
             <button type="submit" className="btn-login">

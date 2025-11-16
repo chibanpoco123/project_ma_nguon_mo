@@ -4,8 +4,8 @@ import jwt from "jsonwebtoken";
 
 // 🔹 Tạo access + refresh token
 const generateTokens = (userId) => {
-  const accessToken = jwt.sign({ id: userId }, "secretkey", { expiresIn: "15m" });
-  const refreshToken = jwt.sign({ id: userId }, "refreshsecret", { expiresIn: "7d" });
+  const accessToken = jwt.sign({ id: userId }, process.env.JWT_SECRET || "secretkey", { expiresIn: "15m" });
+  const refreshToken = jwt.sign({ id: userId }, process.env.JWT_REFRESH_SECRET || "refreshsecret", { expiresIn: "7d" });
   return { accessToken, refreshToken };
 };
 export const createUser = async (req, res) => {
@@ -77,10 +77,10 @@ export const refreshToken = (req, res) => {
     const { token } = req.body;
     if (!token) return res.status(401).json({ message: "Không có refresh token" });
 
-    jwt.verify(token, "refreshsecret", (err, decoded) => {
+    jwt.verify(token, process.env.JWT_REFRESH_SECRET || "refreshsecret", (err, decoded) => {
       if (err) return res.status(403).json({ message: "Refresh token không hợp lệ" });
 
-      const accessToken = jwt.sign({ id: decoded.id }, "secretkey", { expiresIn: "15m" });
+      const accessToken = jwt.sign({ id: decoded.id }, process.env.JWT_SECRET || "secretkey", { expiresIn: "15m" });
       res.json({ accessToken });
     });
   } catch (err) {
