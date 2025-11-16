@@ -1,6 +1,7 @@
 import express from "express";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
+import cors from "cors"; // ✅ Thêm dòng này
 import productRoutes from "./src/routes/product.js"; 
 import userRoutes from "./src/routes/user.js";       
 import categoriesRoutes from "./src/routes/categories.js";
@@ -14,6 +15,11 @@ import Wishlist from "./src/routes/wishlist.js";
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
+app.use(cors({
+  origin: "http://localhost:5173",
+  credentials: true
+}));
+
 app.use(express.json());
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("✅ Kết nối MongoDB Atlas thành công!"))
