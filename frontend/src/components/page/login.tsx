@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState } from "react";
 import "../../assets/css/login.css";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -22,19 +22,9 @@ const LoginPage: React.FC = () => {
   // Xử lý login
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Validate input
-    if (!emailOrPhone || !password) {
-      alert("Vui lòng nhập đầy đủ email và mật khẩu!");
-      return;
-    }
-    
     try {
-      // Normalize email (trim và lowercase)
-      const normalizedEmail = emailOrPhone.trim().toLowerCase();
-      
       const res = await axios.post("http://localhost:3000/api/users/login", {
-        email: normalizedEmail,
+        email: emailOrPhone,
         password: password,
       });
 
@@ -57,13 +47,6 @@ const LoginPage: React.FC = () => {
   // Xử lý register
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Kiểm tra trước khi gửi request - không cho phép đăng ký với admin@icondenim.com
-    if (email.toLowerCase() === "admin@icondenim.com") {
-      alert("Email admin@icondenim.com dành riêng cho quản trị viên. Vui lòng sử dụng email khác hoặc liên hệ quản trị viên.");
-      return;
-    }
-    
     try {
       const res = await axios.post("http://localhost:3000/api/users/register", {
         name,
@@ -81,9 +64,9 @@ const LoginPage: React.FC = () => {
     }
   };
 
-return (
+  return (
     <div className="login-container">
-      
+      {/* Breadcrumb */}
       <div className="breadcrumb">
         <a href="/">Trang chủ</a> / <a href="/categories">Danh mục</a> /{" "}
         <a href="/account">Tài khoản</a> / <span className="current">Đăng nhập</span>
@@ -136,30 +119,6 @@ return (
             <a href="/forgot-password" className="forgot">
               Quên mật khẩu?
             </a>
-
-            {/* 🔹 Social Login */}
-            <div style={{ marginTop: "20px", textAlign: "center" }}>
-              <p>Hoặc đăng nhập bằng:</p>
-              <div id="google-signin" style={{ marginBottom: "10px" }}></div>
-              <button
-                type="button"
-                onClick={handleFacebookSignUp}
-                className="btn-facebook"
-                style={{
-                  width: "100%",
-                  padding: "10px",
-                  backgroundColor: "#1877F2",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "4px",
-                  cursor: "pointer",
-                  fontSize: "16px",
-                  fontWeight: "bold",
-                }}
-              >
-                Đăng nhập bằng Facebook
-              </button>
-            </div>
           </form>
         ) : (
           <form className="form" onSubmit={handleRegister}>
@@ -168,7 +127,6 @@ return (
               placeholder="Họ và tên"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              required
             />
             <input
               type="text"
@@ -181,28 +139,12 @@ return (
               placeholder="Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              required
             />
-            {email.toLowerCase() === "admin@icondenim.com" && (
-              <div style={{
-                padding: "0.75rem",
-                backgroundColor: "#fff3cd",
-                border: "1px solid #ffc107",
-                borderRadius: "4px",
-                fontSize: "0.85rem",
-                color: "#856404",
-                marginBottom: "0.5rem"
-              }}>
-                ⚠️ Email này dành riêng cho quản trị viên. Không thể đăng ký với email này. Vui lòng sử dụng email khác.
-              </div>
-            )}
             <input
               type="password"
               placeholder="Mật khẩu"
               value={regPassword}
               onChange={(e) => setRegPassword(e.target.value)}
-              required
-              minLength={6}
             />
             <button type="submit" className="btn-login">
               ĐĂNG KÝ

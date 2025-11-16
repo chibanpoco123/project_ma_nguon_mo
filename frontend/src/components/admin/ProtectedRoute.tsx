@@ -27,48 +27,36 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
       setIsAuthenticated(true);
 
-      // Check admin role if required
-      // Chỉ email admin@icondenim.com mới có quyền truy cập
       if (requireAdmin && userStr) {
         try {
           const user = JSON.parse(userStr);
-          const isAdminEmail = user.email && user.email.toLowerCase() === 'admin@icondenim.com';
+
+          // ❗ Chỉ kiểm tra ROLE, không kiểm tra email nữa
           const hasAdminRole = user.role === 'admin';
-          
-          // Debug logging
-          console.log('🔍 Admin Check:', {
+
+          console.log("🔍 Admin role check:", {
             email: user.email,
             role: user.role,
-            isAdminEmail,
-            hasAdminRole,
-            result: isAdminEmail && hasAdminRole
+            hasAdminRole
           });
-          
-          setIsAdmin(isAdminEmail && hasAdminRole);
+
+          setIsAdmin(hasAdminRole);
+
         } catch (err) {
           console.error('Error parsing user data:', err);
           setIsAdmin(false);
         }
       } else {
-        setIsAdmin(true); // If admin not required, allow access
+        setIsAdmin(true);
       }
     };
 
     checkAuth();
-
-    // Listen for storage changes (e.g., login in another tab)
-    const handleStorageChange = () => {
-      checkAuth();
-    };
-
-    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('storage', checkAuth);
     
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-    };
+    return () => window.removeEventListener('storage', checkAuth);
   }, [requireAdmin, location]);
 
-  // Show loading while checking authentication
   if (isAuthenticated === null) {
     return (
       <div className="protected-route-loading">
@@ -80,7 +68,6 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     );
   }
 
-  // Redirect to login if not authenticated
   if (!isAuthenticated) {
     return (
       <Navigate 
@@ -91,28 +78,19 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     );
   }
 
-  // Redirect if admin required but user is not admin
   if (requireAdmin && !isAdmin) {
-    const userStr = localStorage.getItem('user');
-    let userInfo = 'Không có thông tin';
-    try {
-      if (userStr) {
-        const user = JSON.parse(userStr);
-        userInfo = `Email: ${user.email || 'N/A'}, Role: ${user.role || 'N/A'}`;
-      }
-    } catch (e) {
-      userInfo = 'Lỗi đọc thông tin user';
-    }
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
 
     return (
       <div className="protected-route-error">
         <h2>⚠️ Không có quyền truy cập</h2>
-        <p>Chỉ tài khoản <strong>admin@icondenim.com</strong> mới có quyền truy cập trang quản trị.</p>
+        <p>Tài khoản của bạn không có quyền Admin.</p>
+
         <div className="alert alert-info mt-3">
           <strong>Thông tin tài khoản hiện tại:</strong><br />
-          <code>{userInfo}</code>
+          <code>Email: {user.email || 'N/A'}, Role: {user.role || 'N/A'}</code>
         </div>
-        <p className="text-muted mt-3">Vui lòng đăng nhập với email <strong>admin@icondenim.com</strong> để tiếp tục.</p>
+
         <div className="mt-3">
           <button 
             className="btn btn-primary me-2"
@@ -135,4 +113,3 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 };
 
 export default ProtectedRoute;
-
