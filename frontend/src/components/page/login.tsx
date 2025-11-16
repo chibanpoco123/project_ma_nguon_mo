@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import "../../assets/css/login.css";
 import axios from "axios";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const LoginPage: React.FC = () => {
   const [isLoginTab, setIsLoginTab] = useState(true);
@@ -18,7 +18,6 @@ const LoginPage: React.FC = () => {
   const [regPassword, setRegPassword] = useState("");
 
   const navigate = useNavigate();
-  const location = useLocation();
 
   // Xử lý login
   const handleLogin = async (e: React.FormEvent) => {
@@ -47,56 +46,11 @@ const LoginPage: React.FC = () => {
         localStorage.setItem("user", JSON.stringify(res.data.user));
       }
 
-      // Kiểm tra nếu là admin@icondenim.com thì chuyển đến trang admin
-      const userEmail = res.data.user?.email?.toLowerCase();
-      const userRole = res.data.user?.role;
-      const isAdmin = userEmail === "admin@icondenim.com" && userRole === "admin";
-      
-      // Debug logging
-      console.log("🔍 Login Check:", {
-        email: userEmail,
-        role: userRole,
-        isAdmin,
-        expectedEmail: "admin@icondenim.com"
-      });
-      
-      if (isAdmin) {
-        alert("Đăng nhập thành công! Chào mừng đến trang quản trị.");
-        navigate("/admin"); // Chuyển đến trang admin
-      } else {
-        alert("Đăng nhập thành công!");
-        // Check if there's a redirect path from protected route
-        const from = (location.state as any)?.from?.pathname || "/";
-        navigate(from); // chuyển về trang trước đó hoặc Home
-      }
+      alert("Đăng nhập thành công!");
+      navigate("/"); // chuyển về Home
     } catch (err: any) {
-      console.error("Login error:", err.response || err);
-      
-      let errorMessage = "Đăng nhập thất bại!";
-      
-      if (err.response) {
-        const status = err.response.status;
-        const message = err.response.data?.message || "Có lỗi xảy ra";
-        const hint = err.response.data?.hint || "";
-        
-        if (status === 404) {
-          errorMessage = `${message}\n\n💡 ${hint || "Tài khoản chưa tồn tại. Vui lòng đăng ký hoặc kiểm tra lại email."}`;
-        } else if (status === 401) {
-          errorMessage = `${message}\n\n💡 ${hint || "Mật khẩu không đúng. Vui lòng thử lại."}`;
-        } else if (status === 403) {
-          errorMessage = message;
-        } else if (status === 500) {
-          errorMessage = "Lỗi server. Vui lòng thử lại sau.";
-        } else {
-          errorMessage = message;
-        }
-      } else if (err.request) {
-        errorMessage = "Không thể kết nối đến server. Vui lòng kiểm tra:\n- Backend có đang chạy không?\n- URL API có đúng không?";
-      } else {
-        errorMessage = "Có lỗi xảy ra: " + err.message;
-      }
-      
-      alert(errorMessage);
+      console.error(err.response || err);
+      alert("Đăng nhập thất bại! Vui lòng kiểm tra email/mật khẩu.");
     }
   };
 
@@ -121,22 +75,15 @@ const LoginPage: React.FC = () => {
       console.log("Register success:", res.data);
       alert("Đăng ký thành công! Vui lòng đăng nhập.");
       setIsLoginTab(true); // chuyển sang tab login
-      
-      // Reset form
-      setName("");
-      setEmail("");
-      setPhone("");
-      setRegPassword("");
     } catch (err: any) {
       console.error(err.response || err);
-      const errorMessage = err.response?.data?.message || "Đăng ký thất bại! Vui lòng thử lại.";
-      alert(errorMessage);
+      alert("Đăng ký thất bại! Vui lòng thử lại.");
     }
   };
 
-  return (
+return (
     <div className="login-container">
-      {/* Breadcrumb */}
+      
       <div className="breadcrumb">
         <a href="/">Trang chủ</a> / <a href="/categories">Danh mục</a> /{" "}
         <a href="/account">Tài khoản</a> / <span className="current">Đăng nhập</span>
@@ -189,6 +136,30 @@ const LoginPage: React.FC = () => {
             <a href="/forgot-password" className="forgot">
               Quên mật khẩu?
             </a>
+
+            {/* 🔹 Social Login */}
+            <div style={{ marginTop: "20px", textAlign: "center" }}>
+              <p>Hoặc đăng nhập bằng:</p>
+              <div id="google-signin" style={{ marginBottom: "10px" }}></div>
+              <button
+                type="button"
+                onClick={handleFacebookSignUp}
+                className="btn-facebook"
+                style={{
+                  width: "100%",
+                  padding: "10px",
+                  backgroundColor: "#1877F2",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "4px",
+                  cursor: "pointer",
+                  fontSize: "16px",
+                  fontWeight: "bold",
+                }}
+              >
+                Đăng nhập bằng Facebook
+              </button>
+            </div>
           </form>
         ) : (
           <form className="form" onSubmit={handleRegister}>
