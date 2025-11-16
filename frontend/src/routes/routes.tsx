@@ -10,14 +10,17 @@ import AdminUsers from '../components/admin/AdminUsers';
 import AdminDebug from '../components/admin/AdminDebug';
 import ProtectedRoute from '../components/admin/ProtectedRoute';
 import Checkout from '../components/page/checkout';
+
 function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<Home />} />
       <Route path="/login" element={<Login />} />
       <Route path="/cart" element={<Cart />} />
+      <Route path="/checkout" element={<Checkout />} />
       <Route path="/debug" element={<AdminDebug />} />
       <Route path="/checkout" element={<Checkout />} />
+
       
       {/* Admin Routes - Protected */}
       <Route 
