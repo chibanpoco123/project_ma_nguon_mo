@@ -34,14 +34,41 @@ export const createUser = async (req, res) => {
 };
 export const registerUser = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, phone } = req.body;
+    
+    // Không cho phép đăng ký với email admin@icondenim.com
+    if (email && email.toLowerCase() === "admin@icondenim.com") {
+      return res.status(403).json({ 
+        message: "Email này dành riêng cho quản trị viên. Vui lòng sử dụng email khác hoặc liên hệ quản trị viên để được cấp quyền." 
+      });
+    }
+    
     const existing = await User.findOne({ email });
     if (existing) return res.status(400).json({ message: "Email đã tồn tại" });
 
     const hashed = await bcrypt.hash(password, 10);
-    const user = new User({ name, email, password: hashed });
+    
+    // Tất cả người dùng đăng ký đều có role customer
+    const role = "customer";
+
+    const user = new User({ 
+      name, 
+      email, 
+      password: hashed,
+      phone: phone || "",
+      role 
+    });
     await user.save();
-    res.status(201).json({ message: "Đăng ký thành công", user });
+    res.status(201).json({ 
+      message: "Đăng ký thành công", 
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        phone: user.phone
+      }
+    });
   } catch (err) {
     res.status(500).json({ message: "Lỗi server", error: err.message });
   }
@@ -49,13 +76,40 @@ export const registerUser = async (req, res) => {
 export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
-    const user = await User.findOne({ email });
-    if (!user) return res.status(404).json({ message: "Không tìm thấy người dùng" });
+    
+    if (!email || !password) {
+      return res.status(400).json({ message: "Email và mật khẩu là bắt buộc" });
+    }
+
+    // Normalize email (lowercase và trim)
+    const normalizedEmail = email.toLowerCase().trim();
+    
+    const user = await User.findOne({ email: normalizedEmail });
+    if (!user) {
+      return res.status(404).json({ 
+        message: "Không tìm thấy người dùng với email này",
+        hint: "Vui lòng kiểm tra lại email hoặc đăng ký tài khoản mới"
+      });
+    }
+
+    // Kiểm tra tài khoản có bị khóa không
+    if (user.is_active === false) {
+      return res.status(403).json({ message: "Tài khoản đã bị khóa. Vui lòng liên hệ quản trị viên." });
+    }
 
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(401).json({ message: "Sai mật khẩu hoặc tài khoản" });
+    if (!isMatch) {
+      return res.status(401).json({ 
+        message: "Mật khẩu không đúng",
+        hint: "Vui lòng kiểm tra lại mật khẩu. Nếu quên mật khẩu, vui lòng liên hệ quản trị viên."
+      });
+    }
 
     const { accessToken, refreshToken } = generateTokens(user._id);
+
+    // Cập nhật last_login_at
+    user.last_login_at = new Date();
+    await user.save();
 
     res.json({
       message: "Đăng nhập thành công",
@@ -69,6 +123,7 @@ export const loginUser = async (req, res) => {
       },
     });
   } catch (err) {
+    console.error("Login error:", err);
     res.status(500).json({ message: "Lỗi server", error: err.message });
   }
 };

@@ -18,6 +18,7 @@ router.post("/register", registerUser);
 
 router.post("/login", loginUser);
 
+
 // 🆕 Quên mật khẩu
 router.post("/forgot-password", forgotPassword);
 
@@ -25,18 +26,21 @@ router.post("/forgot-password", forgotPassword);
 router.post("/reset-password", resetPassword);
 
 // 🆕 👉 ADMIN tạo người dùng ()
+=======
+// ADMIN tạo người dùng ()
+
 router.post("/create", verifyToken, isAdmin, createUser);
 
-// 👉 Danh sách user (chỉ admin)
+// Danh sách user (chỉ admin)
 router.get("/", verifyToken, isAdmin, getAllUsers);
 
-// 👉 Lấy thông tin chi tiết user
+//  Lấy thông tin chi tiết user
 router.get("/:id", verifyToken, getUserById);
 
-// 👉 Cập nhật thông tin (user hoặc admin)
+// Cập nhật thông tin (user hoặc admin)
 router.put("/:id", verifyToken, updateUser);
 
-// 👉 Xóa người dùng
+// Xóa người dùng
 router.delete("/:id", verifyToken, deleteUser);
 
 export default router;
