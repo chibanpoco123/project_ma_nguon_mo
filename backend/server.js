@@ -12,7 +12,9 @@ import couponRoutes from "./src/routes/cupponroutes.js"
 import PaymentRoutes from "./src/routes/payments.js";
 import ShippingRoutes from "./src/routes/shiping.js";
 import Wishlist from "./src/routes/wishlist.js";
+
 import socialAuthRoutes from "./src/routes/socialauth.js";
+
 
 dotenv.config();
 const app = express();
@@ -22,6 +24,7 @@ app.use(cors({
   origin: ['http://localhost:5173', 'http://localhost:3000'],
   credentials: true
 }));
+console.log("MONGO_URI =", process.env.MONGO_URI);
 
 app.use(express.json());
 mongoose.connect(process.env.MONGO_URI)
@@ -40,6 +43,7 @@ app.use("/api/coupons", couponRoutes);
 app.use("api/payments",PaymentRoutes)
 app.use("api/Shipping",ShippingRoutes)
 app.use("api/whishlist",Wishlist)
+
 app.use("/api/auth/social", socialAuthRoutes);
 
 app.listen(PORT, () => {

@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState } from "react";
 import "../../assets/css/login.css";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+
 import tokenManager from "../../utils/tokenManager";
 import ForgotPasswordModal from "../ForgotPasswordModal";
 
@@ -47,6 +48,7 @@ declare global {
   }
 }
 
+
 const LoginPage: React.FC = () => {
   const [isLoginTab, setIsLoginTab] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
@@ -65,6 +67,7 @@ const LoginPage: React.FC = () => {
   const [showForgotModal, setShowForgotModal] = useState(false);
 
   const navigate = useNavigate();
+
 
   // 🔹 Google Callback
   const handleGoogleResponse = useCallback(
@@ -193,7 +196,7 @@ const LoginPage: React.FC = () => {
     const FB = window.FB;
     if (!FB) {
       alert("Facebook SDK chưa được tải!");
-      return;
+      ;
     }
 
     FB.login(
@@ -230,11 +233,9 @@ const LoginPage: React.FC = () => {
       }
 
       alert("Đăng nhập thành công!");
-      navigate("/");
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        console.error(err);
-      }
+      navigate("/"); // chuyển về Home
+    } catch (err: any) {
+      console.error(err.response || err);
       alert("Đăng nhập thất bại! Vui lòng kiểm tra email/mật khẩu.");
     }
   };
@@ -252,23 +253,22 @@ const LoginPage: React.FC = () => {
 
       console.log("Register success:", res.data);
       alert("Đăng ký thành công! Vui lòng đăng nhập.");
-      setIsLoginTab(true);
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        console.error(err);
-      }
+      setIsLoginTab(true); // chuyển sang tab login
+    } catch (err: any) {
+      console.error(err.response || err);
       alert("Đăng ký thất bại! Vui lòng thử lại.");
     }
   };
+
 
   // 🔹 Xử lý quên mật khẩu (deprecated - moved to ForgotPasswordModal component)
   // const handleForgotPassword = async (e: React.FormEvent) => {
   // This function is now handled in ForgotPasswordModal component
   // };
 
-return (
+  return (
     <div className="login-container">
-      
+      {/* Breadcrumb */}
       <div className="breadcrumb">
         <a href="/">Trang chủ</a> / <a href="/categories">Danh mục</a> /{" "}
         <a href="/account">Tài khoản</a> / <span className="current">Đăng nhập</span>
@@ -331,6 +331,7 @@ return (
               }}
             >
               Quên mật khẩu?
+
             </button>
 
             {/* 🔹 Social Login */}
@@ -356,6 +357,7 @@ return (
                 Đăng nhập bằng Facebook
               </button>
             </div>
+            </a>
           </form>
         ) : (
           <form className="form" onSubmit={handleRegister}>
