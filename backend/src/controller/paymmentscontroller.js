@@ -1,4 +1,10 @@
+import crypto from "crypto";
+import https from "https";
 import Payment from "../models/payments.js";
+
+// =============================
+// CRUD PAYMENT
+// =============================
 
 // Tạo payment
 export const createPayment = async (req, res) => {
@@ -35,13 +41,9 @@ export const getPaymentById = async (req, res) => {
 // Cập nhật payment
 export const updatePayment = async (req, res) => {
   try {
-    const updatedPayment = await Payment.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true }
-    );
-    if (!updatedPayment) return res.status(404).json({ message: "Payment không tồn tại" });
-    res.status(200).json(updatedPayment);
+    const updated = await Payment.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!updated) return res.status(404).json({ message: "Payment không tồn tại" });
+    res.status(200).json(updated);
   } catch (error) {
     res.status(400).json({ message: "Cập nhật thất bại", error });
   }
@@ -50,20 +52,24 @@ export const updatePayment = async (req, res) => {
 // Xoá payment
 export const deletePayment = async (req, res) => {
   try {
-    const deletedPayment = await Payment.findByIdAndDelete(req.params.id);
-    if (!deletedPayment) return res.status(404).json({ message: "Payment không tồn tại" });
+    const deleted = await Payment.findByIdAndDelete(req.params.id);
+    if (!deleted) return res.status(404).json({ message: "Payment không tồn tại" });
     res.status(200).json({ message: "Xoá payment thành công" });
   } catch (error) {
     res.status(500).json({ message: "Xoá thất bại", error });
   }
 };
+
+// =============================
+// 🔥 TẠO THANH TOÁN MOMO
+// =============================
 export const createMomoPayment = async (req, res) => {
   try {
     const partnerCode = "MOMO";
     const accessKey = "F8BBA842ECF85";
     const secretKey = "K951B6PE1waDMi640xX08PD3vg6EkVlz";
 
-    const requestId = partnerCode + new Date().getTime();
+    const requestId = partnerCode + Date.now();
     const orderId = requestId;
     const orderInfo = "pay with MoMo";
 
@@ -71,22 +77,22 @@ export const createMomoPayment = async (req, res) => {
     const ipnUrl = "https://callback.url/notify";
 
     const amount = req.body.amount || "50000";
-    const extraData = "";
     const requestType = "captureWallet";
+    const extraData = "";
 
-    // RAW SIGNATURE
+    // ---------------- SIGNATURE ----------------
     const rawSignature =
       `accessKey=${accessKey}&amount=${amount}&extraData=${extraData}` +
       `&ipnUrl=${ipnUrl}&orderId=${orderId}&orderInfo=${orderInfo}` +
       `&partnerCode=${partnerCode}&redirectUrl=${redirectUrl}` +
       `&requestId=${requestId}&requestType=${requestType}`;
 
-    // SIGNATURE
     const signature = crypto
       .createHmac("sha256", secretKey)
       .update(rawSignature)
       .digest("hex");
 
+    // ---------------- BODY ----------------
     const requestBody = JSON.stringify({
       partnerCode,
       accessKey,
@@ -99,10 +105,10 @@ export const createMomoPayment = async (req, res) => {
       extraData,
       requestType,
       signature,
-      lang: "vi"
+      lang: "vi",
     });
 
-    // HTTP REQUEST
+    // ---------------- SEND TO MOMO ----------------
     const options = {
       hostname: "test-payment.momo.vn",
       port: 443,
@@ -110,13 +116,15 @@ export const createMomoPayment = async (req, res) => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Content-Length": Buffer.byteLength(requestBody)
-      }
+        "Content-Length": Buffer.byteLength(requestBody),
+      },
     };
 
-    const momoReq = https.request(options, momoRes => {
+    const momoReq = https.request(options, (momoRes) => {
       let data = "";
-      momoRes.on("data", chunk => data += chunk);
+
+      momoRes.on("data", (chunk) => (data += chunk));
+
       momoRes.on("end", () => {
         const response = JSON.parse(data);
         return res.json(response);
@@ -129,7 +137,6 @@ export const createMomoPayment = async (req, res) => {
 
     momoReq.write(requestBody);
     momoReq.end();
-
   } catch (error) {
     res.status(500).json({ message: "Lỗi MoMo server", error });
   }

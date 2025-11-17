@@ -34,13 +34,11 @@ const Checkout: React.FC = () => {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [subtotal, setSubtotal] = useState(0);
 
-  // --------- Lưu thông tin khách hàng ----------
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
   const [address, setAddress] = useState("");
   const [note, setNote] = useState("");
 
-  // --------- Tỉnh/Quận/Xã ----------
   const [provinces, setProvinces] = useState<Province[]>([]);
   const [districts, setDistricts] = useState<District[]>([]);
   const [wards, setWards] = useState<Ward[]>([]);
@@ -49,7 +47,7 @@ const Checkout: React.FC = () => {
   const [selectedDistrict, setSelectedDistrict] = useState("");
   const [selectedWard, setSelectedWard] = useState("");
 
-  // --------- Lấy giỏ hàng ----------
+  // -------------------- Lấy giỏ hàng --------------------
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
 
@@ -61,11 +59,11 @@ const Checkout: React.FC = () => {
         const validItems = res.data.filter(
           (item: CartItem) => item.product_id !== null
         );
+
         setCart(validItems);
 
         const total = validItems.reduce((sum: number, item: CartItem) => {
-          const price = item.product_id?.price ?? 0;
-          return sum + price * item.quantity;
+          return sum + item.product_id!.price * item.quantity;
         }, 0);
 
         setSubtotal(total);
@@ -73,12 +71,11 @@ const Checkout: React.FC = () => {
       .catch((err) => console.error("API Error:", err));
   }, []);
 
-  // --------- Lấy tỉnh VN ----------
+  // -------------------- Load tỉnh thành --------------------
   useEffect(() => {
     fetch("https://provinces.open-api.vn/api/p/")
       .then((res) => res.json())
-      .then((data) => setProvinces(data))
-      .catch((err) => console.error(err));
+      .then((data) => setProvinces(data));
   }, []);
 
   const handleProvinceChange = (code: string) => {
@@ -90,8 +87,7 @@ const Checkout: React.FC = () => {
 
     fetch(`https://provinces.open-api.vn/api/p/${code}?depth=2`)
       .then((res) => res.json())
-      .then((data) => setDistricts(data.districts))
-      .catch((err) => console.error(err));
+      .then((data) => setDistricts(data.districts));
   };
 
   const handleDistrictChange = (code: string) => {
@@ -101,18 +97,18 @@ const Checkout: React.FC = () => {
 
     fetch(`https://provinces.open-api.vn/api/d/${code}?depth=2`)
       .then((res) => res.json())
-      .then((data) => setWards(data.wards))
-      .catch((err) => console.error(err));
+      .then((data) => setWards(data.wards));
   };
 
-  // --------- Tạo đơn hàng ----------
+  // -------------------- Tạo đơn hàng --------------------
   const handlePayment = async () => {
-       const token = localStorage.getItem("accessToken");  // 👈 Lấy token tại đây
+    const token = localStorage.getItem("accessToken");
 
     if (!token) {
       alert("Bạn chưa đăng nhập!");
       return;
     }
+
     if (!customerName || !customerPhone || !address || !selectedWard) {
       alert("Vui lòng nhập đầy đủ thông tin giao hàng!");
       return;
@@ -134,45 +130,55 @@ const Checkout: React.FC = () => {
       payment_method: payment,
 
       items: cart.map((item) => ({
-        product_id: item.product_id?._id,
-        name: item.product_id?.name,
-        price: item.product_id?.price,
+        product_id: item.product_id!._id,
+        name: item.product_id!.name,
+        price: item.product_id!.price,
         quantity: item.quantity,
-        image: item.product_id?.images[0]
+        image: item.product_id!.images[0],
       })),
 
-      subtotal: subtotal,
+      subtotal,
       shipping_fee: 0,
       discount: 0,
       total_price: subtotal,
     };
 
     try {
+      // Nếu chọn thanh toán Momo → gọi API MoMo riêng
+      if (payment === "MOMO") {
+        const res = await axios.post(
+          "http://localhost:3000/api/payments/momo",
+          { amount: subtotal },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+
+        if (res.data.payUrl) {
+          window.location.href = res.data.payUrl; // redirect sang MoMo
+        }
+        return;
+      }
+
+      // Nếu COD → tạo đơn như bình thường
       const res = await axios.post(
         "http://localhost:3000/api/Order/",
         orderData,
-          {
-    headers: {
-      Authorization: `Bearer ${token}`
-    }
-  }
-        
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
       );
 
       alert("Đặt hàng thành công!");
       console.log("ORDER CREATED:", res.data);
-
     } catch (err: any) {
       console.error(err);
       alert("Đặt hàng thất bại!");
     }
   };
 
-  // --------- Xử lý ảnh ----------
+  // -------------------- Xử lý ảnh --------------------
   const getImageUrl = (img: string | undefined) => {
     if (!img) return "/no-image.png";
-    if (img.startsWith("data:image")) return img;
-    if (img.startsWith("http://") || img.startsWith("https://")) return img;
+    if (img.startsWith("http")) return img;
     return `http://localhost:3000/${img}`;
   };
 
@@ -292,21 +298,20 @@ const Checkout: React.FC = () => {
         {cart.length === 0 ? (
           <p>Giỏ hàng trống...</p>
         ) : (
-          cart.map((item) => {
-            const product = item.product_id!;
-            const imgUrl = getImageUrl(product.images?.[0]);
-            return (
-              <div className="cart-item" key={item._id}>
-                <img src={imgUrl} alt={product.name} />
-                <div className="item-info">
-                  <p>{product.name}</p>
-                  <p className="price">
-                    {(product.price * item.quantity).toLocaleString()}₫
-                  </p>
-                </div>
+          cart.map((item) => (
+            <div className="cart-item" key={item._id}>
+              <img
+                src={getImageUrl(item.product_id!.images?.[0])}
+                alt={item.product_id!.name}
+              />
+              <div className="item-info">
+                <p>{item.product_id!.name}</p>
+                <p className="price">
+                  {(item.product_id!.price * item.quantity).toLocaleString()}₫
+                </p>
               </div>
-            );
-          })
+            </div>
+          ))
         )}
 
         {/* VOUCHER */}
