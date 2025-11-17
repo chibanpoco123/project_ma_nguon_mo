@@ -3,15 +3,21 @@ import jwt from "jsonwebtoken";
 
 // 🔹 Tạo access + refresh token
 const generateTokens = (userId) => {
-  const accessToken = jwt.sign({ id: userId }, "secretkey", { expiresIn: "15m" });
-  const refreshToken = jwt.sign({ id: userId }, "refreshsecret", { expiresIn: "7d" });
+  const accessToken = jwt.sign({ id: userId }, process.env.JWT_SECRET || "secretkey", { expiresIn: "15m" });
+  const refreshToken = jwt.sign({ id: userId }, process.env.JWT_REFRESH_SECRET || "refreshsecret", { expiresIn: "7d" });
   return { accessToken, refreshToken };
 };
 
 // 🔹 Google Callback
 export const googleCallback = async (req, res) => {
   try {
+    console.log("🔵 Google callback received:", JSON.stringify(req.body, null, 2));
+    
     const { id, email, name, picture } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ message: "Email không được cung cấp" });
+    }
 
     let user = await User.findOne({ email });
 
@@ -25,10 +31,12 @@ export const googleCallback = async (req, res) => {
         role: "customer",
       });
       await user.save();
+      console.log("✅ Tạo user mới:", user._id);
     } else if (!user.googleId) {
       user.googleId = id;
       user.avatar = picture;
       await user.save();
+      console.log("✅ Cập nhật user:", user._id);
     }
 
     const { accessToken, refreshToken } = generateTokens(user._id);
@@ -46,7 +54,7 @@ export const googleCallback = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Google callback error:", error);
+    console.error("❌ Google callback error:", error);
     res.status(500).json({ message: "Lỗi xác thực Google", error: error.message });
   }
 };
