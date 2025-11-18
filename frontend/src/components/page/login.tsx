@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import "../../assets/css/login.css";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -17,6 +17,16 @@ interface GoogleAccounts {
 
 interface GoogleWindow {
   accounts: GoogleAccounts;
+}
+
+declare global {
+  interface Window {
+    FB?: {
+      init: (config: Record<string, unknown>) => void;
+      login: (callback: (response: FacebookResponse) => void, options: Record<string, unknown>) => void;
+      api: (path: string, method: string, params: Record<string, unknown>, callback: (response: FacebookUserInfo) => void) => void;
+    };
+  }
 }
 
 interface FacebookResponse {
@@ -196,7 +206,7 @@ const LoginPage: React.FC = () => {
     const FB = window.FB;
     if (!FB) {
       alert("Facebook SDK chưa được tải!");
-      ;
+      return;
     }
 
     FB.login(
@@ -234,8 +244,10 @@ const LoginPage: React.FC = () => {
 
       alert("Đăng nhập thành công!");
       navigate("/"); // chuyển về Home
-    } catch (err: any) {
-      console.error(err.response || err);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        console.error(err.message);
+      }
       alert("Đăng nhập thất bại! Vui lòng kiểm tra email/mật khẩu.");
     }
   };
@@ -254,8 +266,10 @@ const LoginPage: React.FC = () => {
       console.log("Register success:", res.data);
       alert("Đăng ký thành công! Vui lòng đăng nhập.");
       setIsLoginTab(true); // chuyển sang tab login
-    } catch (err: any) {
-      console.error(err.response || err);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        console.error(err.message);
+      }
       alert("Đăng ký thất bại! Vui lòng thử lại.");
     }
   };
@@ -357,7 +371,6 @@ const LoginPage: React.FC = () => {
                 Đăng nhập bằng Facebook
               </button>
             </div>
-            </a>
           </form>
         ) : (
           <form className="form" onSubmit={handleRegister}>

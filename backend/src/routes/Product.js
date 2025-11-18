@@ -7,11 +7,16 @@ const router = express.Router();
 router.get("/search/query", async (req, res) => {
   try {
     const { q } = req.query;
+    console.log("🔍 Search query received:", q);
+    
     if (!q) {
+      console.log("⚠️  Empty query, returning []");
       return res.json([]);
     }
 
     const searchRegex = new RegExp(q, "i");
+    console.log("📊 Search regex:", searchRegex);
+    
     const products = await Product.find({
       $or: [
         { name: searchRegex },
@@ -19,8 +24,10 @@ router.get("/search/query", async (req, res) => {
       ]
     }).populate("category_id");
 
+    console.log("✅ Found products:", products.length);
     res.json(products);
   } catch (err) {
+    console.error("❌ Search error:", err);
     res.status(500).json({ error: err.message });
   }
 });
