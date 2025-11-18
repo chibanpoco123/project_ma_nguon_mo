@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Seed Products</title>
+</head>
+<body>
+    <h1>Seed Sample Products</h1>
+    <button onclick="seedData()">Seed Data</button>
+    <pre id="result"></pre>
+    
+    <script>
+        async function seedData() {
+            try {
+                const response = await fetch('http://localhost:3000/api/products/seed/data', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                const data = await response.json();
+                document.getElementById('result').textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                document.getElementById('result').textContent = 'Error: ' + error.message;
+            }
+        }
+    </script>
+</body>
+</html>

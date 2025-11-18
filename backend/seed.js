@@ -1,85 +1,20 @@
-import express from "express";
-import Product from "../models/product.js";
-import { verifyToken, isAdmin } from "../middlewares/auth.js";
+import mongoose from "mongoose";
+import dotenv from "dotenv";
+import Product from "./src/models/product.js";
 
-const router = express.Router();
+dotenv.config();
 
-router.get("/search/query", async (req, res) => {
+const seedProducts = async () => {
   try {
-    const { q } = req.query;
-    if (!q) {
-      return res.json([]);
-    }
+    await mongoose.connect(process.env.MONGO_URI);
+    console.log("✅ Connected to MongoDB");
 
-    const searchRegex = new RegExp(q, "i");
-    const products = await Product.find({
-      $or: [
-        { name: searchRegex },
-        { description: searchRegex }
-      ]
-    }).populate("category_id");
-
-    res.json(products);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// Lấy danh sách sản phẩm
-router.get("/", async (req, res) => {
-  try {
-    const products = await Product.find().populate("category_id");
-    res.json(products);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// Thêm sản phẩm (chỉ admin)
-router.post("/", verifyToken, isAdmin, async (req, res) => {
-  try {
-    const newProduct = new Product(req.body);
-    const saved = await newProduct.save();
-    res.status(201).json(saved);
-  } catch (err) {
-    res.status(400).json({ error: err.message });
-  }
-});
-
-// Xóa sản phẩm (chỉ admin)
-router.delete("/:id", verifyToken, isAdmin, async (req, res) => {
-  try {
-    const deletedProduct = await Product.findByIdAndDelete(req.params.id);
-    if (!deletedProduct) return res.status(404).json({ error: "Không tìm thấy sản phẩm" });
-    res.json({ message: "Xóa sản phẩm thành công" });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// Sửa sản phẩm (chỉ admin)
-router.put("/:id", verifyToken, isAdmin, async (req, res) => {
-  try {
-    const updatedProduct = await Product.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true, runValidators: true }
-    );
-    if (!updatedProduct) return res.status(404).json({ error: "Không tìm thấy sản phẩm" });
-    res.json(updatedProduct);
-  } catch (err) {
-    res.status(400).json({ error: err.message });
-  }
-});
-
-// Seed sample products (for testing)
-router.post("/seed/data", async (req, res) => {
-  try {
-    // Xóa tất cả sản phẩm cũ
+    // Delete existing products
     await Product.deleteMany({});
+    console.log("🗑️  Deleted existing products");
 
-    // Tạo sample products
-    const sampleProducts = [
+    // Sample products
+    const products = [
       {
         name: "Áo Denim Classic",
         description: "Áo denim cổ điển màu xanh, chất liệu bền bỉ",
@@ -162,15 +97,15 @@ router.post("/seed/data", async (req, res) => {
       }
     ];
 
-    const createdProducts = await Product.insertMany(sampleProducts);
-    res.json({
-      message: "✅ Thêm sample products thành công!",
-      count: createdProducts.length,
-      products: createdProducts
-    });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
+    const created = await Product.insertMany(products);
+    console.log(`✅ Created ${created.length} products`);
 
-export default router
+    await mongoose.disconnect();
+    console.log("✅ Disconnected from MongoDB");
+  } catch (error) {
+    console.error("❌ Error:", error);
+    process.exit(1);
+  }
+};
+
+seedProducts();
