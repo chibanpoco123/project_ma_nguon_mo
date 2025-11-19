@@ -29,11 +29,6 @@ textarea {
   margin-bottom: 10px;
 }
 
-.row {
-  display: flex;
-  gap: 10px;
-}
-
 textarea {
   height: 80px;
 }

@@ -21,7 +21,6 @@ function AppRoutes() {
           <>
             <Header />
             <Home/>
-            <Checkout/>
             <Footer />
           </>
         } 
