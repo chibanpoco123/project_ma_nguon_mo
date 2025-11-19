@@ -6,7 +6,12 @@ const AdminDashboard: React.FC = () => {
   return (
     <div className="admin-dashboard">
       <Container fluid>
-        <h2 className="mb-4">Trang chủ Admin</h2>
+        <div className="d-flex justify-content-between align-items-center mb-4">
+          <div>
+            <h2>Trang chủ Admin</h2>
+            <p className="text-muted mb-0">Quản lý toàn bộ hệ thống website</p>
+          </div>
+        </div>
         
         <Row className="g-4">
           <Col md={4}>

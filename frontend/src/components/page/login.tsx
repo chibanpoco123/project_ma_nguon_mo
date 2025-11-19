@@ -45,6 +45,9 @@ const LoginPage: React.FC = () => {
         localStorage.setItem("accessToken", res.data.accessToken);
         localStorage.setItem("refreshToken", res.data.refreshToken);
         localStorage.setItem("user", JSON.stringify(res.data.user));
+        
+        // Dispatch custom event để Header cập nhật
+        window.dispatchEvent(new Event('userLogin'));
       }
 
       // Kiểm tra nếu là admin@icondenim.com thì chuyển đến trang admin
