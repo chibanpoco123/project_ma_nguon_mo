@@ -1,4 +1,7 @@
+import mongoose from "mongoose";
+
 import express from "express";
+
 import Product from "../models/product.js";
 import { verifyToken, isAdmin } from "../middlewares/auth.js";
 
@@ -35,7 +38,13 @@ router.get("/search/query", async (req, res) => {
 // Lấy danh sách sản phẩm
 router.get("/", async (req, res) => {
   try {
-    const products = await Product.find().populate("category_id");
+    let query = {};
+
+    // Nếu có truyền ?category_id=xxx
+    if (req.query.category_id) {
+      query.category_id = new mongoose.Types.ObjectId(req.query.category_id);
+    }
+    const products = await Product.find(query).populate("category_id");
     res.json(products);
   } catch (err) {
     res.status(500).json({ error: err.message });

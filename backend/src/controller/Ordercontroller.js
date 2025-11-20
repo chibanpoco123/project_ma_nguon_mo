@@ -1,18 +1,21 @@
-import { OrderedBulkOperation } from "mongodb";
 import Order from "../models/Order.js";
-import mongoose, { overwriteMiddlewareResult } from "mongoose";
+import mongoose from "mongoose";
+
 const generateOrderNumber = () => {
   const date = new Date();
   const yyyymmdd = date.toISOString().slice(0, 10).replace(/-/g, "");
   const random = Math.floor(1000 + Math.random() * 9000);
   return `ORD${yyyymmdd}${random}`;
 };
+
 export const createOrder = async (req, res) => {
   try {
     const user_id = req.user.id;
     const order_number = generateOrderNumber();
 
+    // 🚀 LẤY ITEMS TỪ BODY (QUAN TRỌNG)
     const {
+      items,
       customer_name,
       customer_phone,
       customer_email,
@@ -29,13 +32,22 @@ export const createOrder = async (req, res) => {
       shipping_method,
       customer_note,
     } = req.body;
+
+    // ❌ Validate thiếu items
+    if (!items || !Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ message: "Danh sách sản phẩm (items) bị thiếu" });
+    }
+
+    // ❌ Validate thông tin người nhận
     if (!customer_name || !customer_phone || !shipping_address) {
       return res.status(400).json({ message: "Thiếu thông tin người nhận" });
     }
 
+    // 📌 Tạo đơn hàng
     const newOrder = new Order({
       user_id,
       order_number,
+
       customer_name,
       customer_phone,
       customer_email,
@@ -43,23 +55,35 @@ export const createOrder = async (req, res) => {
       shipping_ward,
       shipping_district,
       shipping_province,
+
+      items, // 🚀 LƯU ITEMS VÀO DB
+
       subtotal,
       shipping_fee,
       discount_amount,
       tax,
       total_price,
+
       payment_method,
       shipping_method,
       customer_note,
     });
 
     await newOrder.save();
-    res.status(201).json({ message: "Tạo đơn hàng thành công", order: newOrder });
+
+    res.status(201).json({
+      message: "Tạo đơn hàng thành công",
+      order: newOrder,
+    });
+
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Lỗi khi tạo đơn hàng", error: error.message });
   }
 };
+
+// ===== Giữ nguyên các API còn lại ===== //
+
 export const getUserOrders = async (req, res) => {
   try {
     const user_id = req.user.id;
@@ -70,6 +94,7 @@ export const getUserOrders = async (req, res) => {
     res.status(500).json({ message: "Lỗi khi lấy danh sách đơn hàng" });
   }
 };
+
 export const getOrderById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -86,6 +111,7 @@ export const getOrderById = async (req, res) => {
     res.status(500).json({ message: "Lỗi khi lấy chi tiết đơn hàng" });
   }
 };
+
 export const updateOrderStatus = async (req, res) => {
   try {
     const { id } = req.params;
@@ -98,7 +124,6 @@ export const updateOrderStatus = async (req, res) => {
     if (payment_status) order.payment_status = payment_status;
     if (admin_note) order.admin_note = admin_note;
 
-    // Ghi nhận thời điểm thay đổi trạng thái
     if (status === "confirmed") order.confirmed_at = new Date();
     if (status === "shipped") order.shipped_at = new Date();
     if (status === "delivered") order.delivered_at = new Date();
@@ -113,10 +138,12 @@ export const updateOrderStatus = async (req, res) => {
     res.status(500).json({ message: "Lỗi khi cập nhật đơn hàng" });
   }
 };
+
 export const updateOrderInfo = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { id } = req.params; // id đơn hàng
+    const { id } = req.params;
+
     const {
       customer_name,
       customer_phone,
@@ -129,27 +156,28 @@ export const updateOrderInfo = async (req, res) => {
     const order = await Order.findById(id);
     if (!order) return res.status(404).json({ message: "Không tìm thấy đơn hàng" });
 
-      if (order.user_id.toString() !== userId) {
+    if (order.user_id.toString() !== userId) {
       return res.status(403).json({ message: "Bạn không có quyền sửa đơn này" });
     }
+
     if (order.status !== "pending") {
-      return res.status(400).json({ message: "Chỉ được chỉnh sửa khi đơn đang chờ xác nhận (pending)" });
+      return res.status(400).json({ message: "Chỉ được chỉnh sửa khi đơn đang pending" });
     }
+
     if (customer_name) order.customer_name = customer_name;
     if (customer_phone) order.customer_phone = customer_phone;
     if (shipping_address) order.shipping_address = shipping_address;
     if (shipping_ward) order.shipping_ward = shipping_ward;
     if (shipping_district) order.shipping_district = shipping_district;
     if (shipping_province) order.shipping_province = shipping_province;
+
     order.updated_at = new Date();
     await order.save();
-    res.json({
-      message: "Cập nhật thông tin người nhận thành công",
-      order,
-    });
+
+    res.json({ message: "Cập nhật thông tin thành công", order });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Lỗi khi cập nhật thông tin đơn hàng", error: error.message });
+    res.status(500).json({ message: "Lỗi khi cập nhật đơn hàng", error: error.message });
   }
 };
 
@@ -163,6 +191,7 @@ export const deleteOrder = async (req, res) => {
     res.status(500).json({ message: "Lỗi khi xóa đơn hàng" });
   }
 };
+
 export const getAllOrders = async (req, res) => {
   try {
     const orders = await Order.find()
@@ -175,18 +204,21 @@ export const getAllOrders = async (req, res) => {
     res.status(500).json({ message: "Lỗi khi lấy danh sách đơn hàng" });
   }
 };
+
 export const cancelOrder = async (req, res) => {
   try {
     const { id } = req.params;
-    const userId = req.user.id; 
+    const userId = req.user.id;
     const order = await Order.findById(id);
 
     if (!order) {
       return res.status(404).json({ message: "Không tìm thấy đơn hàng" });
     }
+
     if (order.user_id.toString() !== userId.toString() && !req.user.isAdmin) {
       return res.status(403).json({ message: "Không có quyền hủy đơn hàng này" });
     }
+
     if (order.status !== "pending") {
       return res.status(400).json({
         message: "Chỉ có thể hủy đơn hàng khi trạng thái là 'pending'",

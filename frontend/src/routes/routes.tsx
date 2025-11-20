@@ -14,17 +14,33 @@ import AdminDebug from '../components/admin/AdminDebug';
 import ProtectedRoute from '../components/admin/ProtectedRoute';
 import Checkout from '../components/page/checkout';
 
+
+import Header from '../components/Header';
+import Footer from '../components/Footer';
+
 function AppRoutes() {
   return (
     <Routes>
+      <Route 
+        path="/" 
+        element={
+          <>
+            <Header />
+            <Home/>
+            <Footer />
+          </>
+        } 
+      />
       <Route path="/" element={<Home />} />
       <Route path="/login" element={<Login />} />
       <Route path="/outlet" element={<OutletPage />} />
       <Route path="/search" element={<SearchResultsPage />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/cart" element={<Cart />} />
+      <Route path="/checkout" element={<Checkout />} />
       <Route path="/debug" element={<AdminDebug />} />
       <Route path="/checkout" element={<Checkout />} />
+
       
       {/* Admin Routes - Protected */}
       <Route 

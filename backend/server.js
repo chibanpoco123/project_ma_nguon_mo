@@ -40,12 +40,12 @@ app.use("/api/cart", cartRoutes);
 app.use("/api/Order", OrderRoutes); 
 app.use ("/api/reviews",reviewRoutes)
 app.use("/api/coupons", couponRoutes);
+
 app.use("api/payments",PaymentRoutes)
 app.use("api/Shipping",ShippingRoutes)
 app.use("api/whishlist",Wishlist)
 
 app.use("/api/auth/social", socialAuthRoutes);
-
 app.listen(PORT, () => {
   console.log(`🚀 Server chạy tại: http://localhost:${PORT}`);
 });
