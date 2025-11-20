@@ -4,6 +4,9 @@
 .env.*.local
 node_modules/
 dist/
+backend/.env
+*.env
+
 
 # Frontend  
 .env
@@ -21,3 +24,4 @@ __pycache__/
 .Spotlight-V100
 .Trashes
 ehthumbs.db
+
