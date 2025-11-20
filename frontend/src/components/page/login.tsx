@@ -80,52 +80,28 @@ const LoginPage: React.FC = () => {
 
 
   // 🔹 Google Callback
-  const handleGoogleResponse = useCallback(
-    async (response: { credential: string }) => {
-      try {
-        const decoded = JSON.parse(atob(response.credential.split(".")[1])) as {
-          sub: string;
-          email: string;
-          name: string;
-          picture: string;
-        };
+const handleGoogleResponse = useCallback(
+  async (response: { credential: string }) => {
+    try {
+      const res = await axios.post(
+        "http://localhost:3000/api/auth/social/google/callback",
+        { credential: response.credential }
+      );
 
-        console.log("Decoded Google response:", decoded);
-
-        const res = await axios.post(
-          "http://localhost:3000/api/auth/social/google/callback",
-          {
-            id: decoded.sub,
-            email: decoded.email,
-            name: decoded.name,
-            picture: decoded.picture,
-          }
-        );
-
-        console.log("Backend response:", res.data);
-
-        if (res.data.accessToken) {
-          tokenManager.setTokens(res.data.accessToken, res.data.refreshToken);
-          tokenManager.setUser(res.data.user);
-          alert("Đăng nhập Google thành công!");
-          navigate("/");
-        }
-      } catch (error: unknown) {
-        if (error instanceof Error) {
-          console.error("Google login error:", error.message);
-          alert("Lỗi đăng nhập Google: " + error.message);
-        } else if (error && typeof error === 'object' && 'response' in error) {
-          const axiosError = error as { response?: { data?: { message?: string } } };
-          console.error("Backend error:", axiosError.response?.data?.message);
-          alert("Lỗi từ server: " + (axiosError.response?.data?.message || "Không xác định"));
-        } else {
-          console.error("Google login error:", error);
-          alert("Lỗi đăng nhập Google!");
-        }
+      if (res.data.accessToken) {
+        tokenManager.setTokens(res.data.accessToken, res.data.refreshToken);
+        tokenManager.setUser(res.data.user);
+        alert("Đăng nhập Google thành công!");
+        navigate("/");
       }
-    },
-    [navigate]
-  );
+    } catch (error: any) {
+      console.error("Google login error:", error?.response?.data || error);
+      alert("Lỗi đăng nhập Google!");
+    }
+  },
+  [navigate]
+);
+
 
   // 🔹 Facebook Callback
   const handleFacebookResponse = useCallback(
