@@ -25,3 +25,7 @@ __pycache__/
 .Trashes
 ehthumbs.db
 
+# .gitignore
+venv/
+backend/node_modules/
+frontend/node_modules/
