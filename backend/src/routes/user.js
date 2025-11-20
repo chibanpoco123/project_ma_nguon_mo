@@ -7,9 +7,7 @@ import {
   updateUser,
   deleteUser,
   refreshToken,
-  createUser,
-  forgotPassword,
-  resetPassword
+  createUser
 } from "../controller/usercontroller.js";
 import { verifyToken, isAdmin } from "../middlewares/auth.js";
 
@@ -18,17 +16,7 @@ router.post("/register", registerUser);
 
 router.post("/login", loginUser);
 
-
-// 🆕 Quên mật khẩu
-router.post("/forgot-password", forgotPassword);
-
-// 🆕 Reset mật khẩu
-router.post("/reset-password", resetPassword);
-
-// 🆕 👉 ADMIN tạo người dùng ()
-=======
 // ADMIN tạo người dùng ()
-
 router.post("/create", verifyToken, isAdmin, createUser);
 
 // Danh sách user (chỉ admin)

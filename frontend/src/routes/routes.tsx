@@ -1,8 +1,6 @@
 import { Routes, Route } from 'react-router-dom';
 import Home from '../Home';
 import Login from '../components/page/login';
-
-import ResetPassword from '../components/page/ResetPassword';
 import Cart from '../components/page/Cart';
 import AdminLayout from '../components/admin/AdminLayout';
 import AdminDashboard from '../components/admin/AdminDashboard';
@@ -17,8 +15,6 @@ function AppRoutes() {
     <Routes>
       <Route path="/" element={<Home />} />
       <Route path="/login" element={<Login />} />
-
-      <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/cart" element={<Cart />} />
       <Route path="/debug" element={<AdminDebug />} />
       <Route path="/checkout" element={<Checkout />} />

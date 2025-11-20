@@ -16,15 +16,8 @@ const userSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      validate: {
-        validator: function(v) {
-          // If password is empty/null (OAuth users), allow it
-          if (!v || v === '') return true;
-          // If password exists, it must be at least 6 characters
-          return v.length >= 6;
-        },
-        message: "Mật khẩu ít nhất 6 ký tự khi được cung cấp"
-      }
+      required: false,
+      minlength: [6, "Mật khẩu ít nhất 6 ký tự"],
     },
     phone: {
       type: String,
@@ -68,14 +61,6 @@ const userSchema = new mongoose.Schema(
       default: null,
     },
     last_login_at: {
-      type: Date,
-      default: null,
-    },
-    resetToken: {
-      type: String,
-      default: null,
-    },
-    resetTokenExpire: {
       type: Date,
       default: null,
     },
