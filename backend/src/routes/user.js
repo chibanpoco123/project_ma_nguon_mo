@@ -26,7 +26,7 @@ router.post("/forgot-password", forgotPassword);
 router.post("/reset-password", resetPassword);
 
 // 🆕 👉 ADMIN tạo người dùng ()
-=======
+
 // ADMIN tạo người dùng ()
 
 router.post("/create", verifyToken, isAdmin, createUser);

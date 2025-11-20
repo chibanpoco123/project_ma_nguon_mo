@@ -12,11 +12,23 @@ const generateTokens = (userId) => {
 export const googleCallback = async (req, res) => {
   try {
     console.log("🔵 Google callback received:", JSON.stringify(req.body, null, 2));
-    
-    const { id, email, name, picture } = req.body;
+
+    const { credential } = req.body;
+
+    if (!credential) {
+      return res.status(400).json({ message: "Không nhận được credential từ Google" });
+    }
+
+    const decoded = jwt.decode(credential);
+
+    if (!decoded) {
+      return res.status(400).json({ message: "Credential không hợp lệ" });
+    }
+
+    const { sub: googleId, email, name, picture } = decoded;
 
     if (!email) {
-      return res.status(400).json({ message: "Email không được cung cấp" });
+      return res.status(400).json({ message: "Google không cung cấp email" });
     }
 
     let user = await User.findOne({ email });
@@ -25,18 +37,16 @@ export const googleCallback = async (req, res) => {
       user = new User({
         name,
         email,
-        password: "", // OAuth users don't have password
-        googleId: id,
+        password: "",
+        googleId,
         avatar: picture,
         role: "customer",
       });
       await user.save();
-      console.log("✅ Tạo user mới:", user._id);
     } else if (!user.googleId) {
-      user.googleId = id;
+      user.googleId = googleId;
       user.avatar = picture;
       await user.save();
-      console.log("✅ Cập nhật user:", user._id);
     }
 
     const { accessToken, refreshToken } = generateTokens(user._id);
@@ -58,6 +68,7 @@ export const googleCallback = async (req, res) => {
     res.status(500).json({ message: "Lỗi xác thực Google", error: error.message });
   }
 };
+
 
 // 🔹 Facebook Callback
 export const facebookCallback = async (req, res) => {

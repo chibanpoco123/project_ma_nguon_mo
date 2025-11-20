@@ -360,3 +360,106 @@
   border-top: 1px solid #eee;
 }
 
+/* 🔍 Search Results Page Styles */
+.search-result-col {
+  animation: fadeIn 0.4s ease-in-out;
+}
+
+.search-result-card {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+}
+
+.search-result-card:hover {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+  transform: translateY(-4px);
+}
+
+.product-image-wrapper {
+  position: relative;
+  overflow: hidden;
+  background: #f9f9f9;
+  height: 280px;
+}
+
+.search-product-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.search-result-card:hover .search-product-image {
+  transform: scale(1.05);
+}
+
+.discount-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: #dc3545;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-weight: bold;
+  font-size: 14px;
+  box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
+}
+
+.search-product-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: #333;
+  min-height: 45px;
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.search-price-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.search-original-price {
+  font-size: 13px;
+  color: #999;
+  text-decoration: line-through;
+}
+
+.search-discount-price {
+  font-size: 18px;
+  color: #dc3545;
+}
+
+.search-add-btn {
+  background: linear-gradient(135deg, #d4a574 0%, #c99456 100%);
+  border: none;
+  color: white;
+  font-weight: 600;
+  padding: 10px;
+  transition: all 0.3s ease;
+}
+
+.search-add-btn:hover {
+  background: linear-gradient(135deg, #c99456 0%, #b8834a 100%);
+  box-shadow: 0 4px 12px rgba(212, 165, 116, 0.3);
+  transform: translateY(-2px);
+  color: white;
+}
+
+.min-vh-100 {
+  min-height: 100vh;
+}
+
+.flex-grow-1 {
+  flex-grow: 1;
+}
+

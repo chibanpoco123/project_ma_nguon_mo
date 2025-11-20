@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import "../../assets/css/login.css";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -17,6 +17,16 @@ interface GoogleAccounts {
 
 interface GoogleWindow {
   accounts: GoogleAccounts;
+}
+
+declare global {
+  interface Window {
+    FB?: {
+      init: (config: Record<string, unknown>) => void;
+      login: (callback: (response: FacebookResponse) => void, options: Record<string, unknown>) => void;
+      api: (path: string, method: string, params: Record<string, unknown>, callback: (response: FacebookUserInfo) => void) => void;
+    };
+  }
 }
 
 interface FacebookResponse {
@@ -70,52 +80,28 @@ const LoginPage: React.FC = () => {
 
 
   // 🔹 Google Callback
-  const handleGoogleResponse = useCallback(
-    async (response: { credential: string }) => {
-      try {
-        const decoded = JSON.parse(atob(response.credential.split(".")[1])) as {
-          sub: string;
-          email: string;
-          name: string;
-          picture: string;
-        };
+const handleGoogleResponse = useCallback(
+  async (response: { credential: string }) => {
+    try {
+      const res = await axios.post(
+        "http://localhost:3000/api/auth/social/google/callback",
+        { credential: response.credential }
+      );
 
-        console.log("Decoded Google response:", decoded);
-
-        const res = await axios.post(
-          "http://localhost:3000/api/auth/social/google/callback",
-          {
-            id: decoded.sub,
-            email: decoded.email,
-            name: decoded.name,
-            picture: decoded.picture,
-          }
-        );
-
-        console.log("Backend response:", res.data);
-
-        if (res.data.accessToken) {
-          tokenManager.setTokens(res.data.accessToken, res.data.refreshToken);
-          tokenManager.setUser(res.data.user);
-          alert("Đăng nhập Google thành công!");
-          navigate("/");
-        }
-      } catch (error: unknown) {
-        if (error instanceof Error) {
-          console.error("Google login error:", error.message);
-          alert("Lỗi đăng nhập Google: " + error.message);
-        } else if (error && typeof error === 'object' && 'response' in error) {
-          const axiosError = error as { response?: { data?: { message?: string } } };
-          console.error("Backend error:", axiosError.response?.data?.message);
-          alert("Lỗi từ server: " + (axiosError.response?.data?.message || "Không xác định"));
-        } else {
-          console.error("Google login error:", error);
-          alert("Lỗi đăng nhập Google!");
-        }
+      if (res.data.accessToken) {
+        tokenManager.setTokens(res.data.accessToken, res.data.refreshToken);
+        tokenManager.setUser(res.data.user);
+        alert("Đăng nhập Google thành công!");
+        navigate("/");
       }
-    },
-    [navigate]
-  );
+    } catch (error: any) {
+      console.error("Google login error:", error?.response?.data || error);
+      alert("Lỗi đăng nhập Google!");
+    }
+  },
+  [navigate]
+);
+
 
   // 🔹 Facebook Callback
   const handleFacebookResponse = useCallback(
@@ -196,7 +182,7 @@ const LoginPage: React.FC = () => {
     const FB = window.FB;
     if (!FB) {
       alert("Facebook SDK chưa được tải!");
-      ;
+      return;
     }
 
     FB.login(
@@ -234,8 +220,10 @@ const LoginPage: React.FC = () => {
 
       alert("Đăng nhập thành công!");
       navigate("/"); // chuyển về Home
-    } catch (err: any) {
-      console.error(err.response || err);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        console.error(err.message);
+      }
       alert("Đăng nhập thất bại! Vui lòng kiểm tra email/mật khẩu.");
     }
   };
@@ -254,8 +242,10 @@ const LoginPage: React.FC = () => {
       console.log("Register success:", res.data);
       alert("Đăng ký thành công! Vui lòng đăng nhập.");
       setIsLoginTab(true); // chuyển sang tab login
-    } catch (err: any) {
-      console.error(err.response || err);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        console.error(err.message);
+      }
       alert("Đăng ký thất bại! Vui lòng thử lại.");
     }
   };
@@ -357,7 +347,6 @@ const LoginPage: React.FC = () => {
                 Đăng nhập bằng Facebook
               </button>
             </div>
-            </a>
           </form>
         ) : (
           <form className="form" onSubmit={handleRegister}>
