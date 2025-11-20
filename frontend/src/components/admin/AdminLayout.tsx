@@ -55,6 +55,12 @@ const AdminLayout: React.FC<AdminLayoutProps> = () => {
               >
                 <span>📝 Bài viết</span>
               </Link>
+              <Link 
+                to="/admin/posts" 
+                className={`admin-sidebar-item1 ${isActive('/admin/posts')}`}
+              >
+                <span>📝 đơn hàng </span>
+              </Link>
             </div>
 
             <div className="admin-sidebar-section">

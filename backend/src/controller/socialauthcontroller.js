@@ -3,15 +3,33 @@ import jwt from "jsonwebtoken";
 
 // 🔹 Tạo access + refresh token
 const generateTokens = (userId) => {
-  const accessToken = jwt.sign({ id: userId }, "secretkey", { expiresIn: "15m" });
-  const refreshToken = jwt.sign({ id: userId }, "refreshsecret", { expiresIn: "7d" });
+  const accessToken = jwt.sign({ id: userId }, process.env.JWT_SECRET || "secretkey", { expiresIn: "15m" });
+  const refreshToken = jwt.sign({ id: userId }, process.env.JWT_REFRESH_SECRET || "refreshsecret", { expiresIn: "7d" });
   return { accessToken, refreshToken };
 };
 
 // 🔹 Google Callback
 export const googleCallback = async (req, res) => {
   try {
-    const { id, email, name, picture } = req.body;
+    console.log("🔵 Google callback received:", JSON.stringify(req.body, null, 2));
+
+    const { credential } = req.body;
+
+    if (!credential) {
+      return res.status(400).json({ message: "Không nhận được credential từ Google" });
+    }
+
+    const decoded = jwt.decode(credential);
+
+    if (!decoded) {
+      return res.status(400).json({ message: "Credential không hợp lệ" });
+    }
+
+    const { sub: googleId, email, name, picture } = decoded;
+
+    if (!email) {
+      return res.status(400).json({ message: "Google không cung cấp email" });
+    }
 
     let user = await User.findOne({ email });
 
@@ -19,14 +37,14 @@ export const googleCallback = async (req, res) => {
       user = new User({
         name,
         email,
-        password: "", // OAuth users don't have password
-        googleId: id,
+        password: "",
+        googleId,
         avatar: picture,
         role: "customer",
       });
       await user.save();
     } else if (!user.googleId) {
-      user.googleId = id;
+      user.googleId = googleId;
       user.avatar = picture;
       await user.save();
     }
@@ -46,10 +64,11 @@ export const googleCallback = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Google callback error:", error);
+    console.error("❌ Google callback error:", error);
     res.status(500).json({ message: "Lỗi xác thực Google", error: error.message });
   }
 };
+
 
 // 🔹 Facebook Callback
 export const facebookCallback = async (req, res) => {
