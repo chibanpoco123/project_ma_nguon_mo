@@ -13,10 +13,7 @@
     role?: string;
   }
 
-import { Navbar, Container, Nav } from 'react-bootstrap';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUser, faShoppingBag } from '@fortawesome/free-solid-svg-icons';
-import { Link, useNavigate } from "react-router-dom";
+
 import SearchBar from './SearchBar';
 
 
@@ -182,7 +179,7 @@ function Header() {
           <div className="d-flex align-items-center gap-3">
             <SearchBar onSearch={handleSearch} />
             <a href="#user" className="nav-icon"><FontAwesomeIcon icon={faUser} /></a>
-            <a href="#cart" className="nav-icon"><FontAwesomeIcon icon={faShoppingBag} /></a>
+            <Link to ="/cart" ><FontAwesomeIcon icon={faShoppingBag} /></Link>
             <Link to="/login"><button className="btn btn-outline-dark btn-sm">Đăng nhập</button></Link>
           </div>
         </Navbar.Collapse>
