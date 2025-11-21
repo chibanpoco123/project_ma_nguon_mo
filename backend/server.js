@@ -12,7 +12,6 @@ import couponRoutes from "./src/routes/cupponroutes.js"
 import PaymentRoutes from "./src/routes/payments.js";
 import ShippingRoutes from "./src/routes/shiping.js";
 import Wishlist from "./src/routes/wishlist.js";
-
 import socialAuthRoutes from "./src/routes/socialauth.js";
 
 

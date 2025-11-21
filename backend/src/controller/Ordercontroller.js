@@ -86,14 +86,27 @@ export const createOrder = async (req, res) => {
 
 export const getUserOrders = async (req, res) => {
   try {
+    // Nếu là admin -> lấy toàn bộ đơn hàng
+    if (req.user.isAdmin || req.user.role === "admin") {
+      const orders = await Order.find()
+        .populate("user_id", "name email")
+        .sort({ created_at: -1 });
+
+      return res.json(orders);
+    }
+
+    // User thường -> lấy đơn của họ
     const user_id = req.user.id;
     const orders = await Order.find({ user_id }).sort({ created_at: -1 });
+
     res.json(orders);
+
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Lỗi khi lấy danh sách đơn hàng" });
   }
 };
+
 
 export const getOrderById = async (req, res) => {
   try {
