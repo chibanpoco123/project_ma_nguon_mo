@@ -56,7 +56,49 @@ const AdminDashboard: React.FC = () => {
             </Card>
           </Col>
         </Row>
+        <Row className="g-4">
+          <Col md={4}>
+            <Card className="h-100">
+              <Card.Body>
+                <Card.Title>📦quản lí đơn hàng </Card.Title>
+                <Card.Text>
+                  Thêm, sửa, xóa và quản lý tất cả sản phẩm trong hệ thống.
+                </Card.Text>
+                <Link to="/admin/order" className="btn btn-primary">
+                  Quản lý Sản phẩm
+                </Link>
+              </Card.Body>
+            </Card>
+          </Col>
 
+          <Col md={4}>
+            <Card className="h-100">
+              <Card.Body>
+                <Card.Title>📁 Quản lý Danh mục</Card.Title>
+                <Card.Text>
+                  Quản lý các danh mục sản phẩm và phân loại.
+                </Card.Text>
+                <Link to="/admin/categories" className="btn btn-primary">
+                  Quản lý Danh mục
+                </Link>
+              </Card.Body>
+            </Card>
+          </Col>
+
+          <Col md={4}>
+            <Card className="h-100">
+              <Card.Body>
+                <Card.Title>📝 Quản lý Bài viết</Card.Title>
+                <Card.Text>
+                  Quản lý các bài viết và nội dung trên website.
+                </Card.Text>
+                <Link to="/admin/posts" className="btn btn-primary">
+                  Quản lý Bài viết
+                </Link>
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
         <Row className="g-4 mt-2">
           <Col md={4}>
             <Card className="h-100">

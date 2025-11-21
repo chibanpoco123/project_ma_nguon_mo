@@ -1,7 +1,63 @@
-import React, { useState } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import "../../assets/css/login.css";
 import axios from "axios";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+
+import tokenManager from "../../utils/tokenManager";
+import ForgotPasswordModal from "../ForgotPasswordModal";
+
+interface GoogleAccount {
+  initialize: (config: Record<string, unknown>) => void;
+  renderButton: (element: HTMLElement, config: Record<string, unknown>) => void;
+}
+
+interface GoogleAccounts {
+  id: GoogleAccount;
+}
+
+interface GoogleWindow {
+  accounts: GoogleAccounts;
+}
+
+declare global {
+  interface Window {
+    FB?: {
+      init: (config: Record<string, unknown>) => void;
+      login: (callback: (response: FacebookResponse) => void, options: Record<string, unknown>) => void;
+      api: (path: string, method: string, params: Record<string, unknown>, callback: (response: FacebookUserInfo) => void) => void;
+    };
+  }
+}
+
+interface FacebookResponse {
+  authResponse?: {
+    accessToken: string;
+  };
+}
+
+interface FacebookUserInfo {
+  id: string;
+  email: string;
+  name: string;
+  picture?: {
+    data?: {
+      url: string;
+    };
+  };
+}
+
+declare global {
+  interface Window {
+    google?: GoogleWindow;
+    FB?: {
+      init: (config: Record<string, unknown>) => void;
+      login: (callback: (response: FacebookResponse) => void, options: Record<string, unknown>) => void;
+      api: (path: string, method: string, params: Record<string, unknown>, callback: (response: FacebookUserInfo) => void) => void;
+    };
+    fbAsyncInit?: () => void;
+  }
+}
+
 
 const LoginPage: React.FC = () => {
   const [isLoginTab, setIsLoginTab] = useState(true);
@@ -17,102 +73,172 @@ const LoginPage: React.FC = () => {
   const [email, setEmail] = useState("");
   const [regPassword, setRegPassword] = useState("");
 
+  // Forgot Password Modal state
+  const [showForgotModal, setShowForgotModal] = useState(false);
+
   const navigate = useNavigate();
-  const location = useLocation();
+
+
+  // 🔹 Google Callback
+const handleGoogleResponse = useCallback(
+  async (response: { credential: string }) => {
+    try {
+      const res = await axios.post(
+        "http://localhost:3000/api/auth/social/google/callback",
+        { credential: response.credential }
+      );
+
+      if (res.data.accessToken) {
+        tokenManager.setTokens(res.data.accessToken, res.data.refreshToken);
+        tokenManager.setUser(res.data.user);
+        alert("Đăng nhập Google thành công!");
+        navigate("/");
+      }
+    } catch (error: any) {
+      console.error("Google login error:", error?.response?.data || error);
+      alert("Lỗi đăng nhập Google!");
+    }
+  },
+  [navigate]
+);
+
+
+  // 🔹 Facebook Callback
+  const handleFacebookResponse = useCallback(
+    async (userInfo: FacebookUserInfo) => {
+      try {
+        const res = await axios.post(
+          "http://localhost:3000/api/auth/social/facebook/callback",
+          {
+            id: userInfo.id,
+            email: userInfo.email,
+            name: userInfo.name,
+            picture: userInfo.picture,
+          }
+        );
+
+        tokenManager.setTokens(res.data.accessToken, res.data.refreshToken);
+        tokenManager.setUser(res.data.user);
+
+        alert("Đăng nhập Facebook thành công!");
+        navigate("/");
+      } catch (error: unknown) {
+        console.error("Facebook login error:", error);
+        alert("Lỗi đăng nhập Facebook!");
+      }
+    },
+    [navigate]
+  );
+
+  // 🔹 Load Google & Facebook SDK
+  useEffect(() => {
+    // Load Google SDK
+    const loadGoogleScript = () => {
+      const script = document.createElement("script");
+      script.src = "https://accounts.google.com/gsi/client";
+      script.async = true;
+      script.onload = () => {
+        window.google?.accounts.id.initialize({
+          client_id: "177231615180-g7c68efiksnjpajguad6sp1qkme6dl81.apps.googleusercontent.com",
+          callback: handleGoogleResponse,
+        });
+        window.google?.accounts.id.renderButton(
+          document.getElementById("google-signin") as HTMLElement,
+          {
+            theme: "outline",
+            size: "large",
+            width: "100%",
+          }
+        );
+      };
+      document.body.appendChild(script);
+    };
+
+    // Load Facebook SDK
+    const loadFacebookScript = () => {
+      if (!window.FB) {
+        window.fbAsyncInit = function () {
+          window.FB?.init({
+            appId: "1167329631590386",
+            xfbml: true,
+            version: "v18.0",
+          });
+        };
+
+        const script = document.createElement("script");
+        script.src =
+          "https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v18.0";
+        script.async = true;
+        document.body.appendChild(script);
+      }
+    };
+
+    loadGoogleScript();
+    loadFacebookScript();
+  }, [handleGoogleResponse]);
+
+  // 🔹 Facebook Login
+  const handleFacebookSignUp = () => {
+    const FB = window.FB;
+    if (!FB) {
+      alert("Facebook SDK chưa được tải!");
+      return;
+    }
+
+    FB.login(
+      (response: FacebookResponse) => {
+        if (response.authResponse) {
+          FB.api(
+            "/me",
+            "GET",
+            { fields: "id,name,email,picture" },
+            (userInfo: FacebookUserInfo) => {
+              handleFacebookResponse(userInfo);
+            }
+          );
+        }
+      },
+      { scope: "public_profile,email" }
+    );
+  };
 
   // Xử lý login
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Validate input
-    if (!emailOrPhone || !password) {
-      alert("Vui lòng nhập đầy đủ email và mật khẩu!");
-      return;
-    }
-    
     try {
-      // Normalize email (trim và lowercase)
-      const normalizedEmail = emailOrPhone.trim().toLowerCase();
-      
       const res = await axios.post("http://localhost:3000/api/users/login", {
-        email: normalizedEmail,
+        email: emailOrPhone,
         password: password,
       });
 
       console.log("Login success:", res.data);
 
       if (res.data.accessToken) {
+
         localStorage.setItem("accessToken", res.data.accessToken);
         localStorage.setItem("refreshToken", res.data.refreshToken);
         localStorage.setItem("user", JSON.stringify(res.data.user));
         
         // Dispatch custom event để Header cập nhật
         window.dispatchEvent(new Event('userLogin'));
+
+        tokenManager.setTokens(res.data.accessToken, res.data.refreshToken);
+        tokenManager.setUser(res.data.user);
       }
 
-      // Kiểm tra nếu là admin@icondenim.com thì chuyển đến trang admin
-      const userEmail = res.data.user?.email?.toLowerCase();
-      const userRole = res.data.user?.role;
-      const isAdmin = userEmail === "admin@icondenim.com" && userRole === "admin";
-      
-      // Debug logging
-      console.log("🔍 Login Check:", {
-        email: userEmail,
-        role: userRole,
-        isAdmin,
-        expectedEmail: "admin@icondenim.com"
-      });
-      
-      if (isAdmin) {
-        alert("Đăng nhập thành công! Chào mừng đến trang quản trị.");
-        navigate("/admin"); // Chuyển đến trang admin
-      } else {
-        alert("Đăng nhập thành công!");
-        // Check if there's a redirect path from protected route
-        const from = (location.state as any)?.from?.pathname || "/";
-        navigate(from); // chuyển về trang trước đó hoặc Home
+      alert("Đăng nhập thành công!");
+      navigate("/"); // chuyển về Home
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        console.error(err.message);
       }
-    } catch (err: any) {
-      console.error("Login error:", err.response || err);
-      
-      let errorMessage = "Đăng nhập thất bại!";
-      
-      if (err.response) {
-        const status = err.response.status;
-        const message = err.response.data?.message || "Có lỗi xảy ra";
-        const hint = err.response.data?.hint || "";
-        
-        if (status === 404) {
-          errorMessage = `${message}\n\n💡 ${hint || "Tài khoản chưa tồn tại. Vui lòng đăng ký hoặc kiểm tra lại email."}`;
-        } else if (status === 401) {
-          errorMessage = `${message}\n\n💡 ${hint || "Mật khẩu không đúng. Vui lòng thử lại."}`;
-        } else if (status === 403) {
-          errorMessage = message;
-        } else if (status === 500) {
-          errorMessage = "Lỗi server. Vui lòng thử lại sau.";
-        } else {
-          errorMessage = message;
-        }
-      } else if (err.request) {
-        errorMessage = "Không thể kết nối đến server. Vui lòng kiểm tra:\n- Backend có đang chạy không?\n- URL API có đúng không?";
-      } else {
-        errorMessage = "Có lỗi xảy ra: " + err.message;
-      }
-      
-      alert(errorMessage);
+      alert("Đăng nhập thất bại! Vui lòng kiểm tra email/mật khẩu.");
     }
   };
 
   // Xử lý register
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Kiểm tra trước khi gửi request - không cho phép đăng ký với admin@icondenim.com
-    if (email.toLowerCase() === "admin@icondenim.com") {
-      alert("Email admin@icondenim.com dành riêng cho quản trị viên. Vui lòng sử dụng email khác hoặc liên hệ quản trị viên.");
-      return;
-    }
-    
     try {
       const res = await axios.post("http://localhost:3000/api/users/register", {
         name,
@@ -124,18 +250,19 @@ const LoginPage: React.FC = () => {
       console.log("Register success:", res.data);
       alert("Đăng ký thành công! Vui lòng đăng nhập.");
       setIsLoginTab(true); // chuyển sang tab login
-      
-      // Reset form
-      setName("");
-      setEmail("");
-      setPhone("");
-      setRegPassword("");
-    } catch (err: any) {
-      console.error(err.response || err);
-      const errorMessage = err.response?.data?.message || "Đăng ký thất bại! Vui lòng thử lại.";
-      alert(errorMessage);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        console.error(err.message);
+      }
+      alert("Đăng ký thất bại! Vui lòng thử lại.");
     }
   };
+
+
+  // 🔹 Xử lý quên mật khẩu (deprecated - moved to ForgotPasswordModal component)
+  // const handleForgotPassword = async (e: React.FormEvent) => {
+  // This function is now handled in ForgotPasswordModal component
+  // };
 
   return (
     <div className="login-container">
@@ -183,15 +310,51 @@ const LoginPage: React.FC = () => {
                 className="toggle-password"
                 onClick={() => setShowPassword(!showPassword)}
               >
-                {showPassword ? "👁️" : "🙈"}
+                {showPassword ? "🙉" : "🙈"}
               </span>
             </div>
             <button type="submit" className="btn-login">
               ĐĂNG NHẬP
             </button>
-            <a href="/forgot-password" className="forgot">
+            <button
+              type="button"
+              onClick={() => setShowForgotModal(true)}
+              className="forgot"
+              style={{
+                background: "none",
+                border: "none",
+                color: "#d4a574",
+                cursor: "pointer",
+                textDecoration: "underline",
+              }}
+            >
               Quên mật khẩu?
-            </a>
+
+            </button>
+
+            {/* 🔹 Social Login */}
+            <div style={{ marginTop: "20px", textAlign: "center" }}>
+              <p>Hoặc đăng nhập bằng:</p>
+              <div id="google-signin" style={{ marginBottom: "10px" }}></div>
+              <button
+                type="button"
+                onClick={handleFacebookSignUp}
+                className="btn-facebook"
+                style={{
+                  width: "100%",
+                  padding: "10px",
+                  backgroundColor: "#1877F2",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "4px",
+                  cursor: "pointer",
+                  fontSize: "16px",
+                  fontWeight: "bold",
+                }}
+              >
+                Đăng nhập bằng Facebook
+              </button>
+            </div>
           </form>
         ) : (
           <form className="form" onSubmit={handleRegister}>
@@ -200,7 +363,6 @@ const LoginPage: React.FC = () => {
               placeholder="Họ và tên"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              required
             />
             <input
               type="text"
@@ -213,28 +375,12 @@ const LoginPage: React.FC = () => {
               placeholder="Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              required
             />
-            {email.toLowerCase() === "admin@icondenim.com" && (
-              <div style={{
-                padding: "0.75rem",
-                backgroundColor: "#fff3cd",
-                border: "1px solid #ffc107",
-                borderRadius: "4px",
-                fontSize: "0.85rem",
-                color: "#856404",
-                marginBottom: "0.5rem"
-              }}>
-                ⚠️ Email này dành riêng cho quản trị viên. Không thể đăng ký với email này. Vui lòng sử dụng email khác.
-              </div>
-            )}
             <input
               type="password"
               placeholder="Mật khẩu"
               value={regPassword}
               onChange={(e) => setRegPassword(e.target.value)}
-              required
-              minLength={6}
             />
             <button type="submit" className="btn-login">
               ĐĂNG KÝ
@@ -242,6 +388,16 @@ const LoginPage: React.FC = () => {
           </form>
         )}
       </div>
+
+      {/* 🔹 Forgot Password Modal Component */}
+      <ForgotPasswordModal
+        isOpen={showForgotModal}
+        onClose={() => setShowForgotModal(false)}
+        onSuccess={() => {
+          // Optional: Do something after successful password reset request
+          console.log("✅ Password reset email sent successfully");
+        }}
+      />
     </div>
   );
 };
