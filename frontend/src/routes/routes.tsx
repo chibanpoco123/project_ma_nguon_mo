@@ -5,6 +5,7 @@ import OutletPage from '../components/page/Outlet';
 import SearchResultsPage from '../components/page/SearchResults';
 import ResetPassword from '../components/page/ResetPassword';
 import Cart from '../components/page/Cart';
+import Products from '../components/page/Products';
 import AdminLayout from '../components/admin/AdminLayout';
 import AdminDashboard from '../components/admin/AdminDashboard';
 import AdminProducts from '../components/admin/AdminProducts';
@@ -12,6 +13,8 @@ import AdminDatabase from '../components/admin/AdminDatabase';
 import AdminUsers from '../components/admin/AdminUsers';
 import AdminDebug from '../components/admin/AdminDebug';
 import ProtectedRoute from '../components/admin/ProtectedRoute';
+
+import GuestRoute from '../components/GuestRoute';
 import Checkout from '../components/page/checkout';
 
 
@@ -32,6 +35,18 @@ function AppRoutes() {
         } 
       />
       <Route path="/" element={<Home />} />
+
+      <Route 
+        path="/login" 
+        element={
+          <GuestRoute>
+            <Login />
+          </GuestRoute>
+        } 
+      />
+      <Route path="/cart" element={<Cart />} />
+      <Route path="/products" element={<Products />} />
+
       <Route path="/login" element={<Login />} />
       <Route path="/outlet" element={<OutletPage />} />
       <Route path="/search" element={<SearchResultsPage />} />

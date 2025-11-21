@@ -18,7 +18,12 @@ const AdminLayout: React.FC<AdminLayoutProps> = () => {
       {/* Header */}
       <header className="admin-header">
         <div className="admin-header-content">
-          <h2>Administrator</h2>
+          <div>
+            <h2>Administrator</h2>
+            <p className="mb-0" style={{ fontSize: '0.85rem', opacity: 0.9 }}>
+              Hệ thống quản trị - Quản lý toàn bộ website
+            </p>
+          </div>
           <div className="admin-header-links">
             <Link to="/">Vào trang web</Link>
             <Link to="/admin/contact">Liên hệ</Link>

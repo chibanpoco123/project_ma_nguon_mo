@@ -5,11 +5,13 @@ import '../../css/admin.css';
 interface ProtectedRouteProps {
   children: React.ReactNode;
   requireAdmin?: boolean;
+  redirectMessage?: string;
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ 
   children, 
-  requireAdmin = false 
+  requireAdmin = false,
+  redirectMessage = 'Vui lòng đăng nhập để truy cập trang này'
 }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
@@ -72,7 +74,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     return (
       <Navigate 
         to="/login" 
-        state={{ from: location, message: 'Vui lòng đăng nhập để truy cập trang quản trị' }} 
+        state={{ from: location, message: redirectMessage }} 
         replace 
       />
     );

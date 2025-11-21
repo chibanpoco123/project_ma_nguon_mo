@@ -1,9 +1,9 @@
-# Hướng dẫn tạo tài khoản Admin
+# 🛡️ Hệ thống Admin
 
-## Tài khoản Admin mặc định
+## Thông tin đăng nhập
 
 **Email:** `admin@icondenim.com`  
-**Mật khẩu mặc định:** `admin123`
+**Mật khẩu:** `admin123` (mặc định)
 
 ## Cách 1: Tự động tạo bằng script (Khuyến nghị)
 

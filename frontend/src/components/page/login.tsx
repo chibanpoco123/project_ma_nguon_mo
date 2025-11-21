@@ -214,6 +214,14 @@ const handleGoogleResponse = useCallback(
       console.log("Login success:", res.data);
 
       if (res.data.accessToken) {
+
+        localStorage.setItem("accessToken", res.data.accessToken);
+        localStorage.setItem("refreshToken", res.data.refreshToken);
+        localStorage.setItem("user", JSON.stringify(res.data.user));
+        
+        // Dispatch custom event để Header cập nhật
+        window.dispatchEvent(new Event('userLogin'));
+
         tokenManager.setTokens(res.data.accessToken, res.data.refreshToken);
         tokenManager.setUser(res.data.user);
       }
