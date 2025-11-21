@@ -50,7 +50,6 @@ const Checkout: React.FC = () => {
   // -------------------- Lấy giỏ hàng --------------------
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
-
     axios
       .get("http://localhost:3000/api/cart/", {
         headers: { Authorization: `Bearer ${token}` },

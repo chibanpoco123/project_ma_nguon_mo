@@ -5,7 +5,7 @@ interface ProductCardProps {
   title: string;
   price: string;
 }
-
+import "../css/card.css"
 function ProductCard({ tag, imageUrl, title, price }: ProductCardProps) {
   return (
     <div className="product-card">

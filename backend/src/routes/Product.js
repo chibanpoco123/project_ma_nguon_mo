@@ -188,5 +188,26 @@ router.post("/seed/data", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+// Xem chi tiết sản phẩm theo ID
+router.get("/:id", async (req, res) => {
+  try {
+    const productId = req.params.id;
+
+    // Kiểm tra xem có phải ObjectId hợp lệ không
+    if (!mongoose.Types.ObjectId.isValid(productId)) {
+      return res.status(400).json({ error: "ID sản phẩm không hợp lệ" });
+    }
+
+    const product = await Product.findById(productId).populate("category_id");
+    if (!product) {
+      return res.status(404).json({ error: "Không tìm thấy sản phẩm" });
+    }
+
+    res.json(product);
+  } catch (err) {
+    console.error("❌ Lỗi xem chi tiết sản phẩm:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
 
 export default router

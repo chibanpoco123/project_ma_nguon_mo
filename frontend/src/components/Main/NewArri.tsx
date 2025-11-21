@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { Container, Row, Col, Button } from 'react-bootstrap';
 import ProductCard from '../ProductCard';
-
+import { Link } from "react-router-dom";
 // Banner
 import newArrivalsBanner from '../../assets/new-arrivals-banner.jpg';
 
@@ -31,6 +31,7 @@ const NewArri: React.FC = () => {
             imageUrl: item.images?.[0] || '', // ảnh đầu tiên nếu có
             title: item.name,
             price: item.price?.toLocaleString('vi-VN') + '₫' || 'Liên hệ',
+            productId: item._id
           }));
           setProducts(apiProducts);
         }
@@ -67,7 +68,9 @@ const NewArri: React.FC = () => {
           <Row xs={2} md={3} lg={4} className="g-3">
             {products.map((product, index) => (
               <Col key={index}>
-                <ProductCard {...product} />
+ <Link to={`/product/${product.productId}`} className="product-link">
+  <ProductCard {...product} />
+</Link>
               </Col>
             ))}
           </Row>
