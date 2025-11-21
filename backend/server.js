@@ -41,7 +41,7 @@ app.use("/api/Order", OrderRoutes);
 app.use ("/api/reviews",reviewRoutes)
 app.use("/api/coupons", couponRoutes);
 
-app.use("api/payments",PaymentRoutes)
+app.use("/api/payments",PaymentRoutes)
 app.use("api/Shipping",ShippingRoutes)
 app.use("api/whishlist",Wishlist)
 
