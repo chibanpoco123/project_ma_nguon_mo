@@ -6,10 +6,8 @@ const router = express.Router();
 
 // Thêm sản phẩm
 router.post("/add", verifyToken, addToCart);
-
 // Lấy giỏ hàng
 router.get("/", verifyToken, getCart);
-
 // Cập nhật số lượng
 router.put("/:id", verifyToken, updateCartItem);
 

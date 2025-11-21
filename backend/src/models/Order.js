@@ -13,15 +13,34 @@ const orderSchema = new mongoose.Schema({
   shipping_district: { type: String },
   shipping_province: { type: String },
 
+  // 🛒 DANH SÁCH SẢN PHẨM (QUAN TRỌNG NHẤT)
+items: [
+  {
+    product_id: { 
+      type: mongoose.Schema.Types.ObjectId, 
+      ref: "Product", 
+      required: true 
+    },
+    name: { type: String, required: true },
+    price: { type: Number, required: true },
+    quantity: { type: Number, required: true },
+    image: { type: String }
+  }
+],
+
   // 💰 Giá tiền
-  subtotal: { type: Number, required: true }, // tổng tiền hàng
+  subtotal: { type: Number, required: true },
   shipping_fee: { type: Number, default: 0 },
   discount_amount: { type: Number, default: 0 },
   tax: { type: Number, default: 0 },
   total_price: { type: Number, required: true },
 
   // 💳 Thanh toán & giao hàng
-  payment_method: { type: String, enum: ["COD", "VNPAY", "MOMO"], default: "COD" },
+  payment_method: { 
+    type: String, 
+    enum: ["COD", "VNPAY", "MOMO"], 
+    default: "COD" 
+  },
   payment_status: { 
     type: String, 
     enum: ["pending", "paid", "failed", "refunded"], 
@@ -45,7 +64,6 @@ const orderSchema = new mongoose.Schema({
   delivered_at: { type: Date },
   cancelled_at: { type: Date },
 
-  // 🕒 Timestamps
   created_at: { type: Date, default: Date.now },
   updated_at: { type: Date, default: Date.now },
 });

@@ -1,18 +1,38 @@
-// src/components/InfoBar.tsx
-
+import React, { useEffect, useState } from 'react';
 import { Container, Row, Col, Button } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTruck, faExchangeAlt, faHandHoldingUsd, faPhoneAlt } from '@fortawesome/free-solid-svg-icons';
-
-// Dữ liệu và ảnh từ component voucher cũ
-const vouchers = [
-  { value: '20.000', condition: 'đơn từ 299K', code: 'OCT20' },
-  { value: '40.000', condition: 'đơn từ 599K', code: 'OCT40' },
-  { value: '70.000', condition: 'đơn từ 899K', code: 'OCT70' },
-];
+import axios from 'axios';
 import totebagBanner from '../../assets/totebag-banner.jpg'; 
 
+interface Coupon {
+  value: string;       // vd: '20.000'
+  condition: string;   // vd: 'đơn từ 299K'
+  code: string;        // vd: 'OCT20'
+}
+
 function InfoBar() {
+  const [vouchers, setVouchers] = useState<Coupon[]>([]);
+
+  // Lấy dữ liệu coupon từ backend
+  useEffect(() => {
+    const fetchCoupons = async () => {
+      try {
+        const res = await axios.get('http://localhost:3000/api/coupons');
+        if (res.data && Array.isArray(res.data)) {
+          setVouchers(res.data);
+        } else if (res.data.data && Array.isArray(res.data.data)) {
+          setVouchers(res.data.data);
+        } else {
+          console.error('API không trả về mảng coupons');
+        }
+      } catch (err) {
+        console.error('Lỗi khi gọi API coupons:', err);
+      }
+    };
+
+    fetchCoupons();
+  }, []);
 
   const handleCopy = (code: string) => {
     navigator.clipboard.writeText(code).then(() => {
@@ -21,7 +41,6 @@ function InfoBar() {
   };
 
   return (
-    // Bọc cả 2 phần trong một thẻ <section> chung
     <section className="py-5 border-bottom">
       <Container>
         {/* --- PHẦN INFO BAR GỐC --- */}
@@ -49,19 +68,16 @@ function InfoBar() {
             <Col lg={3} md={4} key={index}>
               <div className="voucher-card">
                 <div className="voucher-details">
-                    
                   <div className="d-flex justify-content-between">
-                    
                     <span className="fw-bold">VOUCHER</span>
                     <span className="text-muted small">{voucher.condition}</span>
                   </div>
-                 <div className="voucher-value">
+                  <div className="voucher-value">
                     <span className="value-amount">{voucher.value}</span>
                     <span className="voucher-currency">VND</span>
-                    </div>
+                  </div>
                   <div className="text-muted small">Nhập mã: {voucher.code}</div>
                 </div>
-                {/* <div className="voucher-separator"></div> */}
                 <Button 
                   variant="dark" 
                   className="copy-button"
@@ -77,4 +93,5 @@ function InfoBar() {
     </section>
   );
 }
+
 export default InfoBar;
