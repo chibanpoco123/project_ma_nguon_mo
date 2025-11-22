@@ -21,27 +21,43 @@ import MenPants from '../components/page/MenPants';
 import AllProducts from '../components/page/AllProducts';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+
 function AppRoutes() {
   return (
     <Routes>
+
+      {/* HOME */}
       <Route 
         path="/" 
         element={
           <>
             <Header />
-            <Home/>
+            <Home />
             <Footer />
           </>
         } 
       />
-      <Route path="/" element={<Home />} />
+
+      {/* CART */}
+      <Route 
+        path="/cart" 
+        element={
+          <>
+            <Header />
+            <Cart />
+            <Footer />
+          </>
+        } 
+      />
+
       <Route path="/login" element={<Login />} />
       <Route path="/outlet" element={<OutletPage />} />
       <Route path="/search" element={<SearchResultsPage />} />
       <Route path="/reset-password" element={<ResetPassword />} />
-      <Route path="/cart" element={<Cart />} />
       <Route path="/checkout" element={<Checkout />} />
       <Route path="/debug" element={<AdminDebug />} />
+
+      {/* PRODUCT DETAIL */}
       <Route 
         path="/product/:id" 
         element={
@@ -52,6 +68,8 @@ function AppRoutes() {
           </>
         } 
       />
+
+      {/* CATEGORY PAGES */}
       <Route 
         path="/new" 
         element={
@@ -62,6 +80,7 @@ function AppRoutes() {
           </>
         } 
       />
+
       <Route 
         path="/men-shirt" 
         element={
@@ -72,6 +91,7 @@ function AppRoutes() {
           </>
         } 
       />
+
       <Route 
         path="/men-pants" 
         element={
@@ -82,6 +102,7 @@ function AppRoutes() {
           </>
         } 
       />
+
       <Route 
         path="/products" 
         element={
@@ -93,8 +114,7 @@ function AppRoutes() {
         } 
       />
 
-      
-      {/* Admin Routes - Protected */}
+      {/* ADMIN PROTECTED */}
       <Route 
         path="/admin" 
         element={
@@ -112,6 +132,7 @@ function AppRoutes() {
         <Route path="database" element={<AdminDatabase />} />
         <Route path="users" element={<AdminUsers />} />
       </Route>
+
     </Routes>
   );
 }

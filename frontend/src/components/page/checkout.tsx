@@ -27,6 +27,34 @@ interface Ward {
   code: number;
   name: string;
 }
+const getImage = (url: string | undefined | null) => {
+  if (!url) return "/no-image.png";
+
+  // CASE 1: Base64 đúng chuẩn
+  if (url.startsWith("data:image")) {
+    return url.replace(/\s/g, ""); // xoá khoảng trắng hoặc xuống dòng
+  }
+
+  // CASE 2: Ảnh backend /uploads
+  if (url.includes("uploads")) {
+    return "http://localhost:3000/" + url.replace(/\\/g, "/").replace("public/", "");
+  }
+
+  // CASE 3: Ảnh FE /src/assets
+  if (url.includes("assets")) {
+    try {
+      const file = url.split("/assets/")[1];
+      return new URL(`../../assets/${file}`, import.meta.url).href;
+    } catch {
+      return "/no-image.png";
+    }
+  }
+
+  // CASE 4: URL đầy đủ
+  if (url.startsWith("http")) return url;
+
+  return "/no-image.png";
+};
 
 const Checkout: React.FC = () => {
   const [payment, setPayment] = useState("COD");
@@ -175,11 +203,11 @@ const Checkout: React.FC = () => {
   };
 
   // -------------------- Xử lý ảnh --------------------
-  const getImageUrl = (img: string | undefined) => {
-    if (!img) return "/no-image.png";
-    if (img.startsWith("http")) return img;
-    return `http://localhost:3000/${img}`;
-  };
+  // const getImageUrl = (img: string | undefined) => {
+  //   if (!img) return "/no-image.png";
+  //   if (img.startsWith("http")) return img;
+  //   return `http://localhost:3000/${img}`;
+  // };
 
   return (
     <div className="checkout-container">
@@ -299,12 +327,14 @@ const Checkout: React.FC = () => {
         ) : (
           cart.map((item) => (
             <div className="cart-item" key={item._id}>
-              <img
-                src={getImageUrl(item.product_id!.images?.[0])}
-                alt={item.product_id!.name}
-              />
+             <img src={getImage(item.product_id?.images?.[0])} alt="" />
+
               <div className="item-info">
+                <div className="item-infor2"style={{display:"flex", justifyContent: "space-between",}}>
                 <p>{item.product_id!.name}</p>
+               
+                <p>SL:{item.quantity}</p>
+                </div>
                 <p className="price">
                   {(item.product_id!.price * item.quantity).toLocaleString()}₫
                 </p>
