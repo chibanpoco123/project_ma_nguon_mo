@@ -11,12 +11,14 @@ import tShirtPromoBanner from '../../assets/aothun-promo-banner.jpg';
 import newArrivalsBanner from '../../assets/new-arrivals-banner.jpg'; // Dữ liệu mẫu
 
 interface Product {
-    tag: string;
     imageUrl: string;
     title: string;
     price: string;
     // *** THÊM TRƯỜNG ID CẦN THIẾT CHO ROUTING ***
-    productId: string; 
+    productId: string;
+    is_new?: boolean;
+    updated_at?: string;
+    created_at?: string;
 }
 
 const AO_THUN_ID = "691fdb3f917b5cd84d2a23c5"; 
@@ -32,12 +34,14 @@ const NewArri: React.FC = () => {
 
                 if (Array.isArray(data)) {
                     const apiProducts: Product[] = data.slice(0, 8).map((item: any) => ({
-                        tag: 'HÀNG MỚI',
                         imageUrl: item.images?.[0] || '', 
                         title: item.name,
                         price: item.price?.toLocaleString('vi-VN') + '₫' || 'Liên hệ',
                         // *** LẤY ID SẢN PHẨM TỪ API ***
-                        productId: item._id, 
+                        productId: item._id,
+                        is_new: item.is_new === true, // Chỉ set true nếu thực sự là true
+                        updated_at: item.updated_at,
+                        created_at: item.created_at
                     }));
                     setProducts(apiProducts);
                 }
@@ -65,7 +69,7 @@ const NewArri: React.FC = () => {
                         <div className="promo-content">
                             <h3>Áo Thun</h3>
                             {/* Chuyển hướng banner */}
-                            <Button variant="light" size="sm" as={Link} to="/category/ao-thun">
+                            <Button variant="light" size="sm" as={Link} to="/men-shirt">
                                 XEM NGAY
                             </Button>
                         </div>
@@ -90,7 +94,7 @@ const NewArri: React.FC = () => {
             </Row>
 
             <div className="text-center mt-4">
-                <Button variant="outline-dark" as={Link} to="/category/new-arrivals">
+                <Button variant="outline-dark" as={Link} to="/men-shirt">
                     Xem tất cả
                 </Button>
             </div>

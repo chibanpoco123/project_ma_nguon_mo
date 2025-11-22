@@ -15,6 +15,10 @@ import ProtectedRoute from '../components/admin/ProtectedRoute';
 import Checkout from '../components/page/checkout';
 import AdminCategoryList from '../components/admin/AdminCategories';
 import ProductDetail from '../components/page/Detail';
+import NewProducts from '../components/page/NewProducts';
+import MenShirt from '../components/page/MenShirt';
+import MenPants from '../components/page/MenPants';
+import AllProducts from '../components/page/AllProducts';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 function AppRoutes() {
@@ -38,8 +42,56 @@ function AppRoutes() {
       <Route path="/cart" element={<Cart />} />
       <Route path="/checkout" element={<Checkout />} />
       <Route path="/debug" element={<AdminDebug />} />
-      <Route path="/checkout" element={<Checkout />} />
-      <Route path="/product/:id" element={<ProductDetail />} />
+      <Route 
+        path="/product/:id" 
+        element={
+          <>
+            <Header />
+            <ProductDetail />
+            <Footer />
+          </>
+        } 
+      />
+      <Route 
+        path="/new" 
+        element={
+          <>
+            <Header />
+            <NewProducts />
+            <Footer />
+          </>
+        } 
+      />
+      <Route 
+        path="/men-shirt" 
+        element={
+          <>
+            <Header />
+            <MenShirt />
+            <Footer />
+          </>
+        } 
+      />
+      <Route 
+        path="/men-pants" 
+        element={
+          <>
+            <Header />
+            <MenPants />
+            <Footer />
+          </>
+        } 
+      />
+      <Route 
+        path="/products" 
+        element={
+          <>
+            <Header />
+            <AllProducts />
+            <Footer />
+          </>
+        } 
+      />
 
       
       {/* Admin Routes - Protected */}
