@@ -33,10 +33,10 @@ function Header() {
         <Navbar.Toggle aria-controls="main-nav" />
         <Navbar.Collapse id="main-nav">
           <Nav className="mx-auto">
-            <Nav.Link href="#products">Sản phẩm</Nav.Link>
-            <Nav.Link href="#new" className="fw-bold">Hàng Mới</Nav.Link>
-            <Nav.Link href="#men-shirt">Áo Nam</Nav.Link>
-            <Nav.Link href="#men-pants">Quần Nam</Nav.Link>
+            <Link to="/products" className="nav-link">Sản phẩm</Link>
+            <Link to="/new" className="nav-link fw-bold">Hàng Mới</Link>
+            <Link to="/men-shirt" className="nav-link">Áo Nam</Link>
+            <Link to="/men-pants" className="nav-link">Quần Nam</Link>
             <Nav.Link href="#denim">DENIM</Nav.Link>
             <Nav.Link href="#tech-urban">TechUrban</Nav.Link>
             <Link to="/outlet" className="nav-link">
