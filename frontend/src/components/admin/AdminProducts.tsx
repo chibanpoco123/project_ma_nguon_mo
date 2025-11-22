@@ -16,6 +16,7 @@ interface Product {
     name: string;
   };
   images: string[];
+  is_new?: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -43,6 +44,7 @@ const AdminProducts: React.FC = () => {
   // Search and filter
   const [searchTerm, setSearchTerm] = useState('');
   const [searchBy, setSearchBy] = useState('name');
+  const [filterIsNew, setFilterIsNew] = useState<string>('all'); // 'all', 'new', 'not-new'
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
   const API_URL = 'http://localhost:3000/api/products';
@@ -134,13 +136,26 @@ const AdminProducts: React.FC = () => {
   // Filter products
   const filteredProducts = products.filter((product) => {
     const searchValue = searchTerm.toLowerCase();
-    if (searchBy === 'name') {
-      return product.name.toLowerCase().includes(searchValue);
+    
+    // Filter by search term
+    let matchesSearch = true;
+    if (searchTerm) {
+      if (searchBy === 'name') {
+        matchesSearch = product.name.toLowerCase().includes(searchValue);
+      } else if (searchBy === 'category') {
+        matchesSearch = product.category_id?.name.toLowerCase().includes(searchValue) || false;
+      }
     }
-    if (searchBy === 'category') {
-      return product.category_id?.name.toLowerCase().includes(searchValue);
+    
+    // Filter by is_new status
+    let matchesIsNew = true;
+    if (filterIsNew === 'new') {
+      matchesIsNew = product.is_new === true;
+    } else if (filterIsNew === 'not-new') {
+      matchesIsNew = product.is_new !== true;
     }
-    return true;
+    
+    return matchesSearch && matchesIsNew;
   });
 
   const formatPrice = (price: number) => {
@@ -192,6 +207,17 @@ const AdminProducts: React.FC = () => {
             </Form.Select>
             <Form.Select
               size="sm"
+              value={filterIsNew}
+              onChange={(e) => setFilterIsNew(e.target.value)}
+              style={{ width: '150px' }}
+              aria-label="Lọc theo trạng thái hàng mới"
+            >
+              <option value="all">Tất cả</option>
+              <option value="new">Hàng mới</option>
+              <option value="not-new">Không phải hàng mới</option>
+            </Form.Select>
+            <Form.Select
+              size="sm"
               value={itemsPerPage}
               onChange={(e) => setItemsPerPage(Number(e.target.value))}
               style={{ width: '150px' }}
@@ -224,13 +250,14 @@ const AdminProducts: React.FC = () => {
                   <th>Giá</th>
                   <th>Giảm giá</th>
                   <th>Số lượng</th>
+                  <th style={{ width: '120px' }}>Hàng mới</th>
                   <th style={{ width: '100px' }}>Tác vụ</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredProducts.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="text-center py-4">
+                    <td colSpan={9} className="text-center py-4">
                       Không có sản phẩm nào
                     </td>
                   </tr>
@@ -273,6 +300,25 @@ const AdminProducts: React.FC = () => {
                       <td>{formatPrice(product.price || 0)}</td>
                       <td>{product.discount || 0}%</td>
                       <td>{product.quantity || 0}</td>
+                      <td>
+                        {product.is_new ? (
+                          <span
+                            style={{
+                              display: 'inline-block',
+                              backgroundColor: '#1A0F4A',
+                              color: 'white',
+                              padding: '4px 8px',
+                              borderRadius: '4px',
+                              fontSize: '0.75rem',
+                              fontWeight: 'bold',
+                            }}
+                          >
+                            HÀNG MỚI
+                          </span>
+                        ) : (
+                          <span style={{ color: '#999', fontSize: '0.875rem' }}>-</span>
+                        )}
+                      </td>
                       <td>
                         <div className="admin-action-buttons">
                           <Button

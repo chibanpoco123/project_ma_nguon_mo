@@ -3,6 +3,7 @@ import "../../assets/css/checkout.css";
 import axios from "axios";
 import momo from "../../assets/icon/Payment By Momo.png";
 import vvnpay from "../../assets/icon/Payment By ATM.png";
+import { useNavigate, useLocation } from "react-router-dom";
 
 interface CartItem {
   _id: string;
@@ -28,7 +29,39 @@ interface Ward {
   name: string;
 }
 
+// 🟩 GIỮ NGUYÊN HÀM XỬ LÝ HÌNH ẢNH CỦA BẠN
+const getImage = (url: string | undefined | null) => {
+  if (!url) return "/no-image.png";
+
+  if (url.startsWith("data:image")) {
+    return url.replace(/\s/g, "");
+  }
+
+  if (url.includes("uploads")) {
+    return "http://localhost:3000/" + url.replace(/\\/g, "/").replace("public/", "");
+  }
+
+  if (url.includes("assets")) {
+    try {
+      const file = url.split("/assets/")[1];
+      return new URL(`../../assets/${file}`, import.meta.url).href;
+    } catch {
+      return "/no-image.png";
+    }
+  }
+
+  if (url.startsWith("http")) return url;
+
+  return "/no-image.png";
+};
+
 const Checkout: React.FC = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // 🟩 NHẬN BUY NOW TỪ PRODUCT DETAIL
+  const buyNowItem = location.state?.product || null;
+
   const [payment, setPayment] = useState("COD");
   const [voucher, setVoucher] = useState("");
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -47,24 +80,28 @@ const Checkout: React.FC = () => {
   const [selectedDistrict, setSelectedDistrict] = useState("");
   const [selectedWard, setSelectedWard] = useState("");
 
-  // -------------------- Lấy giỏ hàng --------------------
+  // -------------------- Lấy dữ liệu giỏ hàng --------------------
   useEffect(() => {
+    // Nếu là mua ngay → KHÔNG FETCH GIỎ HÀNG
+    if (buyNowItem) {
+      setSubtotal(buyNowItem.price * buyNowItem.quantity);
+      return;
+    }
+
     const token = localStorage.getItem("accessToken");
     axios
       .get("http://localhost:3000/api/cart/", {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => {
-        const validItems = res.data.filter(
-          (item: CartItem) => item.product_id !== null
+        const valid = res.data.filter((item: CartItem) => item.product_id !== null);
+        setCart(valid);
+
+        const total = valid.reduce(
+          (sum: number, item: CartItem) =>
+            sum + item.product_id!.price * item.quantity,
+          0
         );
-
-        setCart(validItems);
-
-        const total = validItems.reduce((sum: number, item: CartItem) => {
-          return sum + item.product_id!.price * item.quantity;
-        }, 0);
-
         setSubtotal(total);
       })
       .catch((err) => console.error("API Error:", err));
@@ -102,21 +139,28 @@ const Checkout: React.FC = () => {
   // -------------------- Tạo đơn hàng --------------------
   const handlePayment = async () => {
     const token = localStorage.getItem("accessToken");
+    if (!token) return alert("Bạn chưa đăng nhập!");
 
-    if (!token) {
-      alert("Bạn chưa đăng nhập!");
-      return;
-    }
+    if (!customerName || !customerPhone || !address || !selectedWard)
+      return alert("Vui lòng nhập đầy đủ thông tin giao hàng!");
 
-    if (!customerName || !customerPhone || !address || !selectedWard) {
-      alert("Vui lòng nhập đầy đủ thông tin giao hàng!");
-      return;
-    }
-
-    if (cart.length === 0) {
-      alert("Giỏ hàng trống!");
-      return;
-    }
+    const itemsToOrder = buyNowItem
+      ? [
+          {
+            product_id: buyNowItem._id,
+            name: buyNowItem.name,
+            price: buyNowItem.price,
+            quantity: buyNowItem.quantity,
+            image: buyNowItem.images?.[0],
+          },
+        ]
+      : cart.map((item) => ({
+          product_id: item.product_id!._id,
+          name: item.product_id!.name,
+          price: item.product_id!.price,
+          quantity: item.quantity,
+          image: item.product_id!.images[0],
+        }));
 
     const orderData = {
       customer_name: customerName,
@@ -125,17 +169,9 @@ const Checkout: React.FC = () => {
       shipping_ward: selectedWard,
       shipping_district: selectedDistrict,
       shipping_province: selectedProvince,
-      note: note,
+      note,
       payment_method: payment,
-
-      items: cart.map((item) => ({
-        product_id: item.product_id!._id,
-        name: item.product_id!.name,
-        price: item.product_id!.price,
-        quantity: item.quantity,
-        image: item.product_id!.images[0],
-      })),
-
+      items: itemsToOrder,
       subtotal,
       shipping_fee: 0,
       discount: 0,
@@ -143,7 +179,6 @@ const Checkout: React.FC = () => {
     };
 
     try {
-      // Nếu chọn thanh toán Momo → gọi API MoMo riêng
       if (payment === "MOMO") {
         const res = await axios.post(
           "http://localhost:3000/api/payments/momo",
@@ -151,141 +186,90 @@ const Checkout: React.FC = () => {
           { headers: { Authorization: `Bearer ${token}` } }
         );
 
-        if (res.data.payUrl) {
-          window.location.href = res.data.payUrl; // redirect sang MoMo
-        }
+        if (res.data.payUrl) window.location.href = res.data.payUrl;
         return;
       }
 
-      // Nếu COD → tạo đơn như bình thường
-      const res = await axios.post(
+      await axios.post(
         "http://localhost:3000/api/Order/",
         orderData,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
       alert("Đặt hàng thành công!");
-      console.log("ORDER CREATED:", res.data);
-    } catch (err: any) {
+
+      if (!buyNowItem) {
+        await axios.delete("http://localhost:3000/api/cart/clear/all", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      }
+
+      navigate("/");
+    } catch (err) {
       console.error(err);
       alert("Đặt hàng thất bại!");
     }
   };
 
-  // -------------------- Xử lý ảnh --------------------
-  const getImageUrl = (img: string | undefined) => {
-    if (!img) return "/no-image.png";
-    if (img.startsWith("http")) return img;
-    return `http://localhost:3000/${img}`;
-  };
-
   return (
     <div className="checkout-container">
+
       {/* LEFT */}
       <div className="checkout-left">
         <h3>Thông tin đơn hàng</h3>
 
         <div className="form-group">
-          <input
-            type="text"
-            placeholder="Họ và tên"
-            value={customerName}
-            onChange={(e) => setCustomerName(e.target.value)}
-          />
+          <input type="text" placeholder="Họ và tên"
+            value={customerName} onChange={(e) => setCustomerName(e.target.value)} />
 
-          <input
-            type="text"
-            placeholder="Số điện thoại"
-            value={customerPhone}
-            onChange={(e) => setCustomerPhone(e.target.value)}
-          />
+          <input type="text" placeholder="Số điện thoại"
+            value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} />
 
-          <input
-            type="text"
-            placeholder="Địa chỉ (Số nhà, đường)"
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-          />
+          <input type="text" placeholder="Địa chỉ"
+            value={address} onChange={(e) => setAddress(e.target.value)} />
 
-          {/* Tỉnh/Quận/Xã */}
-          <select
-            value={selectedProvince}
-            onChange={(e) => handleProvinceChange(e.target.value)}
-          >
+          {/* tỉnh / huyện / xã */}
+          <select value={selectedProvince} onChange={(e) => handleProvinceChange(e.target.value)}>
             <option value="">Chọn tỉnh/thành phố</option>
             {provinces.map((p) => (
-              <option key={p.code} value={p.code}>
-                {p.name}
-              </option>
+              <option key={p.code} value={p.code}>{p.name}</option>
             ))}
           </select>
 
-          <select
-            value={selectedDistrict}
-            onChange={(e) => handleDistrictChange(e.target.value)}
-          >
+          <select value={selectedDistrict} onChange={(e) => handleDistrictChange(e.target.value)}>
             <option value="">Chọn Quận/Huyện</option>
             {districts.map((d) => (
-              <option key={d.code} value={d.code}>
-                {d.name}
-              </option>
+              <option key={d.code} value={d.code}>{d.name}</option>
             ))}
           </select>
 
-          <select
-            value={selectedWard}
-            onChange={(e) => setSelectedWard(e.target.value)}
-          >
+          <select value={selectedWard} onChange={(e) => setSelectedWard(e.target.value)}>
             <option value="">Chọn Phường/Xã</option>
             {wards.map((w) => (
-              <option key={w.code} value={w.code}>
-                {w.name}
-              </option>
+              <option key={w.code} value={w.code}>{w.name}</option>
             ))}
           </select>
 
-          <textarea
-            placeholder="Yêu cầu giao hàng"
-            value={note}
-            onChange={(e) => setNote(e.target.value)}
-          ></textarea>
+          <textarea placeholder="Ghi chú"
+            value={note} onChange={(e) => setNote(e.target.value)}></textarea>
         </div>
 
-        {/* PHƯƠNG THỨC THANH TOÁN */}
+        {/* PAYMENT */}
         <h3>Hình thức thanh toán</h3>
         <div className="payment-box">
           <label className="pay-option">
-            <input
-              type="radio"
-              name="payment"
-              checked={payment === "COD"}
-              onChange={() => setPayment("COD")}
-            />
+            <input type="radio" checked={payment === "COD"} onChange={() => setPayment("COD")} />
             <span>COD – Thanh toán khi nhận hàng</span>
           </label>
 
           <label className="pay-option">
-            <input
-              type="radio"
-              name="payment"
-              checked={payment === "VNPAY"}
-              onChange={() => setPayment("VNPAY")}
-            />
-            <img src={vvnpay} alt="" />
-            <span>Thanh toán VNPay</span>
+            <input type="radio" checked={payment === "VNPAY"} onChange={() => setPayment("VNPAY")} />
+            <img src={vvnpay} /><span>Thanh toán VNPay</span>
           </label>
 
           <label className="pay-option">
-            <input
-              type="radio"
-              name="payment"
-              checked={payment === "MOMO"}
-              onChange={() => setPayment("MOMO")}
-            />
-            <img src={momo} alt="" />
-            <span>Thanh toán MoMo</span>
+            <input type="radio" checked={payment === "MOMO"} onChange={() => setPayment("MOMO")} />
+            <img src={momo} /><span>Thanh toán MoMo</span>
           </label>
         </div>
       </div>
@@ -294,51 +278,53 @@ const Checkout: React.FC = () => {
       <div className="checkout-right">
         <h3>Giỏ hàng</h3>
 
-        {cart.length === 0 ? (
-          <p>Giỏ hàng trống...</p>
-        ) : (
-          cart.map((item) => (
-            <div className="cart-item" key={item._id}>
-              <img
-                src={getImageUrl(item.product_id!.images?.[0])}
-                alt={item.product_id!.name}
-              />
-              <div className="item-info">
-                <p>{item.product_id!.name}</p>
-                <p className="price">
-                  {(item.product_id!.price * item.quantity).toLocaleString()}₫
-                </p>
-              </div>
+        {/* 🟩 BUY NOW → chỉ hiện 1 sản phẩm */}
+        {buyNowItem ? (
+          <div className="cart-item">
+            <img src={getImage(buyNowItem.images?.[0])} alt="" />
+
+            <div className="item-info">
+              <p>{buyNowItem.name}</p>
+              <p>SL: {buyNowItem.quantity}</p>
+              <p className="price">
+                {(buyNowItem.price * buyNowItem.quantity).toLocaleString()}₫
+              </p>
             </div>
-          ))
+          </div>
+        ) : (
+          <>
+            {cart.length === 0 ? (
+              <p>Giỏ hàng trống...</p>
+            ) : (
+              cart.map((item) => (
+                <div className="cart-item" key={item._id}>
+                  <img src={getImage(item.product_id?.images?.[0])} />
+
+                  <div className="item-info">
+                    <p>{item.product_id!.name}</p>
+                    <p>SL: {item.quantity}</p>
+                    <p className="price">
+                      {(item.product_id!.price * item.quantity).toLocaleString()}₫
+                    </p>
+                  </div>
+                </div>
+              ))
+            )}
+          </>
         )}
 
         {/* VOUCHER */}
         <div className="voucher-box">
-          <input
-            type="text"
-            placeholder="Nhập mã giảm giá"
-            value={voucher}
-            onChange={(e) => setVoucher(e.target.value)}
-          />
+          <input type="text" placeholder="Nhập mã giảm giá"
+            value={voucher} onChange={(e) => setVoucher(e.target.value)} />
           <button className="apply-btn">Áp dụng</button>
         </div>
 
         {/* SUMMARY */}
         <div className="summary">
-          <div>
-            <span>Tạm tính</span>
-            <span>{subtotal.toLocaleString()}₫</span>
-          </div>
-          <div>
-            <span>Phí vận chuyển</span>
-            <span>Miễn phí</span>
-          </div>
-          <div>
-            <span>Voucher giảm</span>
-            <span>0₫</span>
-          </div>
-
+          <div><span>Tạm tính</span><span>{subtotal.toLocaleString()}₫</span></div>
+          <div><span>Phí ship</span><span>Miễn phí</span></div>
+          <div><span>Giảm giá</span><span>0₫</span></div>
           <div className="total">
             <span>Tổng cộng</span>
             <span>{subtotal.toLocaleString()}₫</span>

@@ -15,6 +15,6 @@ router.put("/:id", verifyToken, updateCartItem);
 router.delete("/:id", verifyToken, removeCartItem);
 
 // Xóa toàn bộ giỏ
-router.delete("/clear/all", verifyToken,isAdmin, clearCart);
+router.delete("/clear/all", verifyToken, clearCart);
 
 export default router;
