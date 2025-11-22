@@ -1,7 +1,6 @@
 // src/components/NewArrivals.tsx
 
 import { Container, Row, Col, Button } from 'react-bootstrap';
-import { Link } from 'react-router-dom';
 import ProductCard from '../ProductCard';
 
 // 1. Import ảnh banner mới của bạn
@@ -15,17 +14,17 @@ import hat from '../../assets/product-hat.jpg';
 import boxer from '../../assets/product-boxer.jpg';
 
 const products = [
-  { imageUrl: tshirt, title: 'Áo Thun Nam Họa Tiết...', price: '299,000₫' },
-  { imageUrl: short, title: 'Quần Short Nam Tactical...', price: '349,000₫' },
-  { imageUrl: shirt, title: 'Áo Sơ Mi Tay Dài Nam...', price: '349,000₫' },
-  { imageUrl: hat, title: 'Nón Lưỡi Trai Nam...', price: '249,000₫' },
-  { imageUrl: boxer, title: 'Quần Boxer Nam...', price: '100,000₫' },
+  { tag: 'HÀNG MỚI', imageUrl: tshirt, title: 'Áo Thun Nam Họa Tiết...', price: '299,000₫' },
+  { tag: 'HÀNG MỚI', imageUrl: short, title: 'Quần Short Nam Tactical...', price: '349,000₫' },
+  { tag: 'HÀNG MỚI', imageUrl: shirt, title: 'Áo Sơ Mi Tay Dài Nam...', price: '349,000₫' },
+  { tag: 'HÀNG MỚI', imageUrl: hat, title: 'Nón Lưỡi Trai Nam...', price: '249,000₫' },
+  { tag: 'HÀNG MỚI', imageUrl: boxer, title: 'Quần Boxer Nam...', price: '100,000₫' },
 ];
 
 function NewArrivals() {
   return (
     
-<Container as="section" className="py-2 dark-section">
+<Container as="section" id="products" className="py-2 dark-section">
       
       {/* 2. Thêm thẻ <img> cho banner ở đây và xóa nút "XEM NGAY" cũ */}
       <img 
@@ -45,9 +44,7 @@ function NewArrivals() {
       </Row>
 
       <div className="text-center mt-4">
-        <Link to="/new">
-          <Button variant="outline-dark">Xem tất cả</Button>
-        </Link>
+      <Button variant="outline-dark">Xem tất cả</Button>
       </div>
     </Container>
   );

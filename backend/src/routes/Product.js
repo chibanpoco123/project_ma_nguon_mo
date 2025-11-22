@@ -1,8 +1,9 @@
 import mongoose from "mongoose";
+
 import express from "express";
+
 import Product from "../models/product.js";
 import { verifyToken, isAdmin } from "../middlewares/auth.js";
-import upload from "../middlewares/upload.js";
 
 const router = express.Router();
 
@@ -43,33 +44,10 @@ router.get("/", async (req, res) => {
     if (req.query.category_id) {
       query.category_id = new mongoose.Types.ObjectId(req.query.category_id);
     }
-    
-    // Nếu có truyền ?is_new=true hoặc ?is_new=false
-    if (req.query.is_new !== undefined) {
-      query.is_new = req.query.is_new === 'true' || req.query.is_new === true;
-    }
-    
     const products = await Product.find(query).populate("category_id");
     res.json(products);
   } catch (err) {
     res.status(500).json({ error: err.message });
-  }
-});
-
-// Upload ảnh (chỉ admin)
-router.post("/upload", verifyToken, isAdmin, upload.array('images', 10), async (req, res) => {
-  try {
-    if (!req.files || req.files.length === 0) {
-      return res.status(400).json({ error: 'Không có file nào được upload' });
-    }
-
-    const imagePaths = req.files.map(file => `/uploads/${file.filename}`);
-    res.json({ 
-      message: 'Upload thành công',
-      images: imagePaths 
-    });
-  } catch (err) {
-    res.status(400).json({ error: err.message });
   }
 });
 
@@ -98,46 +76,15 @@ router.delete("/:id", verifyToken, isAdmin, async (req, res) => {
 // Sửa sản phẩm (chỉ admin)
 router.put("/:id", verifyToken, isAdmin, async (req, res) => {
   try {
-    console.log("🔄 Cập nhật sản phẩm:", {
-      productId: req.params.id,
-      userId: req.user?._id,
-      userRole: req.user?.role,
-      updateData: req.body
-    });
-    
-    // Chuẩn bị dữ liệu cập nhật
-    const updateData = {
-      ...req.body,
-      updated_at: new Date()
-    };
-    
-    // Xử lý category_id: nếu là empty string thì set null
-    if (updateData.category_id === '' || updateData.category_id === null) {
-      updateData.category_id = null;
-    }
-    
-    // Đảm bảo is_new là boolean
-    if (updateData.is_new !== undefined) {
-      updateData.is_new = Boolean(updateData.is_new);
-    }
-    
     const updatedProduct = await Product.findByIdAndUpdate(
       req.params.id,
-      updateData,
+      req.body,
       { new: true, runValidators: true }
     );
-    
-    if (!updatedProduct) {
-      console.log("❌ Không tìm thấy sản phẩm:", req.params.id);
-      return res.status(404).json({ error: "Không tìm thấy sản phẩm" });
-    }
-    
-    console.log("✅ Cập nhật sản phẩm thành công:", updatedProduct._id);
+    if (!updatedProduct) return res.status(404).json({ error: "Không tìm thấy sản phẩm" });
     res.json(updatedProduct);
   } catch (err) {
-    console.error("❌ Lỗi cập nhật sản phẩm:", err);
-    const errorMessage = err.message || "Có lỗi xảy ra khi cập nhật sản phẩm";
-    res.status(400).json({ error: errorMessage });
+    res.status(400).json({ error: err.message });
   }
 });
 

@@ -20,7 +20,7 @@ const collections = [
 
 function CollectionsBootstrap() {
   return (
-    <Container as="section" className="py-4 text-center">
+    <Container as="section" id="denim" className="py-4 text-center">
       <h2 className="section-title mb-4">Bộ Sưu Tập Mới Nhất</h2>
 
       <Carousel indicators={false} interval={null}>

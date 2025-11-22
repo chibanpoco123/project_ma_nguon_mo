@@ -8,13 +8,10 @@ import { Link } from "react-router-dom";
 import newArrivalsBanner from '../../assets/new-arrivals-banner.jpg';
 
 interface Product {
+  tag: string;
   imageUrl: string;
   title: string;
   price: string;
-  productId: string;
-  is_new?: boolean;
-  updated_at?: string;
-  created_at?: string;
 }
 
 const HANG_MOI_ID = "691c9e7679b13d609112c4c1"; // ID category Hàng Mới
@@ -30,13 +27,11 @@ const NewArri: React.FC = () => {
 
         if (Array.isArray(data)) {
           const apiProducts: Product[] = data.slice(0, 8).map((item: any) => ({
+            tag: 'HÀNG MỚI',
             imageUrl: item.images?.[0] || '', // ảnh đầu tiên nếu có
             title: item.name,
             price: item.price?.toLocaleString('vi-VN') + '₫' || 'Liên hệ',
-            productId: item._id,
-            is_new: item.is_new === true, // Chỉ set true nếu thực sự là true
-            updated_at: item.updated_at,
-            created_at: item.created_at
+            productId: item._id
           }));
           setProducts(apiProducts);
         }
@@ -49,7 +44,7 @@ const NewArri: React.FC = () => {
   }, []);
 
   return (
-    <Container as="section" className="py-3">
+    <Container as="section" id="new" className="py-3">
       <div className="product-filter-nav">
         <a href="#" className="active">Hàng mới</a>
         <a href="#">Bán chạy</a>
@@ -83,9 +78,7 @@ const NewArri: React.FC = () => {
       </Row>
 
       <div className="text-center mt-4">
-        <Link to="/new">
-          <Button variant="outline-dark">Xem tất cả</Button>
-        </Link>
+        <Button variant="outline-dark">Xem tất cả</Button>
       </div>
     </Container>
   );
