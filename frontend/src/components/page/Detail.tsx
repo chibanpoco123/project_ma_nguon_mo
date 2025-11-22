@@ -113,6 +113,31 @@ const ProductDetail: React.FC = () => {
 
   fetchProduct();
 }, [id]);
+const handleBuyNow = () => {
+  if (!productData) return;
+
+  if (!selectedSize) {
+    alert("Vui lòng chọn size!");
+    return;
+  }
+
+  const qtyInput = document.querySelector<HTMLInputElement>(".product-info__quantity");
+  const quantity = qtyInput ? Number(qtyInput.value) : 1;
+
+  // Gửi dữ liệu sang trang checkout
+  navigate("/checkout", {
+    state: {
+      product: {
+        _id: productData._id,
+        name: productData.name,
+        price: productData.price,
+        image: productData.images?.[0],
+        size: selectedSize,
+        quantity: quantity
+      }
+    }
+  });
+};
 
 
   // -------------------------
@@ -271,7 +296,12 @@ const ProductDetail: React.FC = () => {
             <button className="product-info__add-to-cart" onClick={handleAddToCart}>THÊM VÀO GIỎ</button>
           </div>
 
-          <button className="product-info__buy-now">MUA NGAY</button>
+<button 
+  className="product-info__buy-now"
+  onClick={handleBuyNow}
+>
+  MUA NGAY
+</button>
         </div>
       </div>
 

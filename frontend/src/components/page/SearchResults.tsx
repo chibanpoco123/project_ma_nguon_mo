@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Container, Row, Col, Card, Button } from 'react-bootstrap';
+import { Link } from 'react-router-dom';
 import Header from '../Header';
 import Footer from '../Footer';
 import axiosInstance from '../../utils/axiosConfig';
@@ -106,44 +107,54 @@ const SearchResultsPage: React.FC = () => {
 
           {/* Search Results or Empty State */}
           {!loading && products.length > 0 ? (
-            <Row className="g-4">
-              {products.map((product) => (
-                <Col key={product._id} md={6} lg={4} className="search-result-col">
-                  <Card className="search-result-card h-100">
-                    <div className="product-image-wrapper">
-                      <Card.Img
-                        variant="top"
-                        src={getImageUrl(product.images)}
-                        alt={product.name}
-                        className="search-product-image"
-                      />
-                      {product.discount > 0 && (
-                        <div className="discount-badge">-{product.discount}%</div>
-                      )}
-                    </div>
-                    <Card.Body className="d-flex flex-column">
-                      <Card.Title className="search-product-name">
-                        {product.name}
-                      </Card.Title>
-                      <div className="search-price-section mb-3">
-                        <span className="search-original-price">
-                          {product.price?.toLocaleString('vi-VN')}đ
-                        </span>
-                        <span className="search-discount-price fw-bold">
-                          {getDiscountPrice(product.price, product.discount).toLocaleString('vi-VN')}đ
-                        </span>
-                      </div>
-                      <Button
-                        variant="danger"
-                        className="mt-auto search-add-btn"
-                      >
-                        Thêm vào giỏ
-                      </Button>
-                    </Card.Body>
-                  </Card>
-                </Col>
-              ))}
-            </Row>
+         <Row className="g-4">
+  {products.map((product) => (
+    <Col key={product._id} md={6} lg={4} className="search-result-col">
+      <Link 
+        to={`/product/${product._id}`} 
+        className="text-decoration-none text-dark"
+        style={{ cursor: "pointer" }}
+      >
+        <Card className="search-result-card h-100">
+          <div className="product-image-wrapper">
+            <Card.Img
+              variant="top"
+              src={getImageUrl(product.images)}
+              alt={product.name}
+              className="search-product-image"
+            />
+            {product.discount > 0 && (
+              <div className="discount-badge">-{product.discount}%</div>
+            )}
+          </div>
+
+          <Card.Body className="d-flex flex-column">
+            <Card.Title className="search-product-name">
+              {product.name}
+            </Card.Title>
+
+            <div className="search-price-section mb-3">
+              <span className="search-original-price">
+                {product.price?.toLocaleString('vi-VN')}đ
+              </span>
+              <span className="search-discount-price fw-bold">
+                {getDiscountPrice(product.price, product.discount).toLocaleString('vi-VN')}đ
+              </span>
+            </div>
+
+            <Button
+              variant="danger"
+              className="mt-auto search-add-btn"
+              onClick={(e) => e.preventDefault()} 
+            >
+              Thêm vào giỏ
+            </Button>
+          </Card.Body>
+        </Card>
+      </Link>
+    </Col>
+  ))}
+</Row>
           ) : !loading && !error && (
             <div className="text-center py-5">
               <h4 className="text-muted">😔 Không tìm thấy sản phẩm</h4>
