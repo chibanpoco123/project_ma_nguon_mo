@@ -17,7 +17,6 @@ import AdminCategoryList from '../components/admin/AdminCategories';
 import ProductDetail from '../components/page/Detail';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-
 function AppRoutes() {
   return (
     <Routes>
@@ -55,7 +54,6 @@ function AppRoutes() {
         <Route index element={<AdminDashboard />} />
         <Route path="products" element={<AdminProducts />} />
         <Route path="categories" element={<AdminCategoryList />} />
-
         <Route path="posts" element={<div>Quản lý Bài viết - Đang phát triển</div>} />
         <Route path="contact" element={<div>Liên hệ - Đang phát triển</div>} />
         <Route path="orders" element={<div>Đơn hàng - Đang phát triển</div>} />
