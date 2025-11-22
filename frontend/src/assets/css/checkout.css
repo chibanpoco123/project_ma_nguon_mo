@@ -5,6 +5,18 @@
   margin: 20px auto;
   gap: 30px;
 }
+.item-info p {
+  display: flex;
+  flex-direction: row;
+}
+.item-info {
+  width: 100%;
+}
+.item-infor2 {
+  width: 60%;
+  display: flex;
+  }
+
 
 /* LEFT SECTION */
 .checkout-left {

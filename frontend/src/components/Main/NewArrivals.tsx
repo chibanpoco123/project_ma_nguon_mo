@@ -1,6 +1,7 @@
 // src/components/NewArrivals.tsx
 
 import { Container, Row, Col, Button } from 'react-bootstrap';
+import { Link } from 'react-router-dom';
 import ProductCard from '../ProductCard';
 
 // 1. Import ảnh banner mới của bạn
@@ -14,11 +15,11 @@ import hat from '../../assets/product-hat.jpg';
 import boxer from '../../assets/product-boxer.jpg';
 
 const products = [
-  { tag: 'HÀNG MỚI', imageUrl: tshirt, title: 'Áo Thun Nam Họa Tiết...', price: '299,000₫' },
-  { tag: 'HÀNG MỚI', imageUrl: short, title: 'Quần Short Nam Tactical...', price: '349,000₫' },
-  { tag: 'HÀNG MỚI', imageUrl: shirt, title: 'Áo Sơ Mi Tay Dài Nam...', price: '349,000₫' },
-  { tag: 'HÀNG MỚI', imageUrl: hat, title: 'Nón Lưỡi Trai Nam...', price: '249,000₫' },
-  { tag: 'HÀNG MỚI', imageUrl: boxer, title: 'Quần Boxer Nam...', price: '100,000₫' },
+  { imageUrl: tshirt, title: 'Áo Thun Nam Họa Tiết...', price: '299,000₫' },
+  { imageUrl: short, title: 'Quần Short Nam Tactical...', price: '349,000₫' },
+  { imageUrl: shirt, title: 'Áo Sơ Mi Tay Dài Nam...', price: '349,000₫' },
+  { imageUrl: hat, title: 'Nón Lưỡi Trai Nam...', price: '249,000₫' },
+  { imageUrl: boxer, title: 'Quần Boxer Nam...', price: '100,000₫' },
 ];
 
 function NewArrivals() {
@@ -44,7 +45,9 @@ function NewArrivals() {
       </Row>
 
       <div className="text-center mt-4">
-      <Button variant="outline-dark">Xem tất cả</Button>
+        <Link to="/new">
+          <Button variant="outline-dark">Xem tất cả</Button>
+        </Link>
       </div>
     </Container>
   );

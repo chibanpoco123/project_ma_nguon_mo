@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import '../../css/ProductDetail.css';
-
+import axios from "axios";
+import { useNavigate } from 'react-router-dom';
 interface Product {
   _id: string;
   name: string;
@@ -20,6 +21,51 @@ const ProductDetail: React.FC = () => {
   const [activeTab, setActiveTab] = useState('MÔ TẢ');
   const [mainImage, setMainImage] = useState<string>("");
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
+  const navigate = useNavigate();
+  const handleAddToCart = async () => {
+  if (!productData) return;
+
+  const token = localStorage.getItem("accessToken");
+
+  if (!token) {
+    alert("Bạn cần đăng nhập để thêm vào giỏ hàng!");
+    navigate("/login");
+    return;
+  }
+
+  const qtyInput = document.querySelector<HTMLInputElement>(".product-info__quantity");
+  const quantity = qtyInput ? Number(qtyInput.value) : 1;
+
+  if (!selectedSize) {
+    alert("Vui lòng chọn size!");
+    return;
+  }
+
+  try {
+    const res = await axios.post(
+      "http://localhost:3000/api/cart/add",
+      {
+        product_id: productData._id,
+        quantity,
+        size: selectedSize
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+
+    console.log("Add to cart response:", res.data);
+
+    alert("Đã thêm vào giỏ hàng!");
+    navigate("/cart");
+
+  } catch (err) {
+    console.error("❌ Lỗi thêm giỏ hàng:", err);
+    alert("Không thể thêm vào giỏ hàng!");
+  }
+};
 
   // -------------------------
   // LẤY SẢN PHẨM THEO ID
@@ -67,6 +113,31 @@ const ProductDetail: React.FC = () => {
 
   fetchProduct();
 }, [id]);
+const handleBuyNow = () => {
+  if (!productData) return;
+
+  if (!selectedSize) {
+    alert("Vui lòng chọn size!");
+    return;
+  }
+
+  const qtyInput = document.querySelector<HTMLInputElement>(".product-info__quantity");
+  const quantity = qtyInput ? Number(qtyInput.value) : 1;
+
+  // Gửi dữ liệu sang trang checkout
+  navigate("/checkout", {
+    state: {
+      product: {
+        _id: productData._id,
+        name: productData.name,
+        price: productData.price,
+        image: productData.images?.[0],
+        size: selectedSize,
+        quantity: quantity
+      }
+    }
+  });
+};
 
 
   // -------------------------
@@ -222,10 +293,15 @@ const ProductDetail: React.FC = () => {
           {/* CTA */}
           <div className="product-info__cta-group">
             <input type="number" defaultValue={1} min={1} className="product-info__quantity" />
-            <button className="product-info__add-to-cart">THÊM VÀO GIỎ</button>
+            <button className="product-info__add-to-cart" onClick={handleAddToCart}>THÊM VÀO GIỎ</button>
           </div>
 
-          <button className="product-info__buy-now">MUA NGAY</button>
+<button 
+  className="product-info__buy-now"
+  onClick={handleBuyNow}
+>
+  MUA NGAY
+</button>
         </div>
       </div>
 
