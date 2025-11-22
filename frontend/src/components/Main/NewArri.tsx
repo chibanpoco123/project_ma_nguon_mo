@@ -44,7 +44,7 @@ const NewArri: React.FC = () => {
   }, []);
 
   return (
-    <Container as="section" className="py-3">
+    <Container as="section" id="new" className="py-3">
       <div className="product-filter-nav">
         <a href="#" className="active">Hàng mới</a>
         <a href="#">Bán chạy</a>

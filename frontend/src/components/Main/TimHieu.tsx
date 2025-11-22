@@ -17,7 +17,7 @@ function TimHieu() {
 
   return (
     <> {/* Bọc ngoài bằng React.Fragment */}
-      <Container as="section" className="py-3 text-center">
+      <Container as="section" id="tech-urban" className="py-3 text-center">
         <h2 className="section-title mb-4">Tìm Hiểu TechUrban® Jeans</h2>
         
         {/* 5. Gắn sự kiện onClick vào đây để mở Modal */}

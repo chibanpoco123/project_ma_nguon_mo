@@ -13,8 +13,8 @@ import AdminUsers from '../components/admin/AdminUsers';
 import AdminDebug from '../components/admin/AdminDebug';
 import ProtectedRoute from '../components/admin/ProtectedRoute';
 import Checkout from '../components/page/checkout';
-import AdminCategoryList from '../components/admin/AdminCategories';
-import ProductDetail from '../components/page/Detail';
+
+
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 
@@ -36,11 +36,27 @@ function AppRoutes() {
       <Route path="/outlet" element={<OutletPage />} />
       <Route path="/search" element={<SearchResultsPage />} />
       <Route path="/reset-password" element={<ResetPassword />} />
-      <Route path="/cart" element={<Cart />} />
-      <Route path="/checkout" element={<Checkout />} />
+      <Route 
+        path="/cart" 
+        element={
+          <>
+            <Header />
+            <Cart />
+            <Footer />
+          </>
+        } 
+      />
+      <Route 
+        path="/checkout" 
+        element={
+          <>
+            <Header />
+            <Checkout />
+            <Footer />
+          </>
+        } 
+      />
       <Route path="/debug" element={<AdminDebug />} />
-      <Route path="/checkout" element={<Checkout />} />
-      <Route path="/product/:id" element={<ProductDetail />} />
 
       
       {/* Admin Routes - Protected */}
@@ -54,8 +70,7 @@ function AppRoutes() {
       >
         <Route index element={<AdminDashboard />} />
         <Route path="products" element={<AdminProducts />} />
-        <Route path="categories" element={<AdminCategoryList />} />
-
+        <Route path="categories" element={<div>Quản lý Danh mục - Đang phát triển</div>} />
         <Route path="posts" element={<div>Quản lý Bài viết - Đang phát triển</div>} />
         <Route path="contact" element={<div>Liên hệ - Đang phát triển</div>} />
         <Route path="orders" element={<div>Đơn hàng - Đang phát triển</div>} />

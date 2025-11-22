@@ -24,7 +24,7 @@ const products = [
 function NewArrivals() {
   return (
     
-<Container as="section" className="py-2 dark-section">
+<Container as="section" id="products" className="py-2 dark-section">
       
       {/* 2. Thêm thẻ <img> cho banner ở đây và xóa nút "XEM NGAY" cũ */}
       <img 

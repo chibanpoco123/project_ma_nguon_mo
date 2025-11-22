@@ -21,7 +21,7 @@ const shorts = [
 
 function Quanshort() {
   return (
-    <Container as="section" className="py-3">
+    <Container as="section" id="men-pants" className="py-3">
       {/* Thanh điều hướng lọc sản phẩm */}
       <div className="category-nav">
         <a href="#" className="active">Quần Short</a>
