@@ -14,7 +14,7 @@ function generatePayID() {
 }
 
 export const createPayment = async (req, res) => {
-  console.log("📌 FULL BODY NHẬN TỪ FE:", req.body);
+  
   try {
     const payment = new Payment(req.body);
     const savedPayment = await payment.save();
