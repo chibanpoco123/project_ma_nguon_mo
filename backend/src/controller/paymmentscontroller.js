@@ -170,12 +170,10 @@ export const createMomoPayment = async (req, res) => {
       `&ipnUrl=${ipnUrl}&orderId=${orderId}&orderInfo=${orderInfo}` +
       `&partnerCode=${partnerCode}&redirectUrl=${redirectUrl}` +
       `&requestId=${requestId}&requestType=${requestType}`;
-
     const signature = crypto
       .createHmac("sha256", secretKey)
       .update(rawSignature)
       .digest("hex");
-
     // Body gửi lên MoMo
     const requestBody = {
       partnerCode,
@@ -191,13 +189,11 @@ export const createMomoPayment = async (req, res) => {
       signature,
       lang: "vi",
     };
-
     // Gọi MoMo API
     const response = await axios.post(
       "https://test-payment.momo.vn/v2/gateway/api/create",
       requestBody
     );
-
     // TRẢ PAYURL ĐỂ FE REDIRECT
     return res.json({
       payUrl: response.data.payUrl,
@@ -316,9 +312,7 @@ export const vnpayReturn = async (req, res) => {
         const payment = await Payment.findOne({ order_id: orderId });
 
         if (!payment) {
-            return res.status(404).json({
-                message: "Không tìm thấy payment của đơn hàng",
-            });
+            return res.redirect("http://localhost:5173/payment-failed?reason=not_found");
         }
 
         if (verify.isSuccess) {
@@ -334,38 +328,30 @@ export const vnpayReturn = async (req, res) => {
                 { new: true }
             );
 
-            // 2) UPDATE ORDER — KHÔNG TẠO ORDER MỚI
-            const updatedOrder = await Order.findByIdAndUpdate(
+            // 2) Update order
+            await Order.findByIdAndUpdate(
                 orderId,
                 {
-                    status: "confirmed", // CHỌN STATUS ĐÚNG TRONG ENUM
+                    status: "confirmed",
                     payment_id: updatedPayment._id,
-                },
-                { new: true }
+                }
             );
 
-            return res.json({
-                status: "success",
-                message: "Thanh toán thành công!",
-                payment: updatedPayment,
-                order: updatedOrder,
-            });
+            // 🔥 REDIRECT TRỞ VỀ FE
+            return res.redirect(`http://localhost:5173/payment-success?order=${orderId}`);
 
         } else {
+            // FAIL → redirect sang FE thông báo lỗi
             await Payment.findOneAndUpdate(
                 { order_id: orderId },
                 { status: "failed" }
             );
 
-            return res.json({
-                status: "fail",
-                message: "Thanh toán thất bại!",
-            });
+            return res.redirect("http://localhost:5173/payment-failed");
         }
+
     } catch (error) {
-        return res.status(500).json({
-            message: "Lỗi khi xác thực VNPay",
-            error: error.message,
-        });
+        return res.redirect("http://localhost:5173/payment-failed?reason=server_error");
     }
 };
+

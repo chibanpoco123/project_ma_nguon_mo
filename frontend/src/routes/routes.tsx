@@ -21,6 +21,7 @@ import MenPants from '../components/page/MenPants';
 import AllProducts from '../components/page/AllProducts';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import PaymentSuccess from '../components/page/PaymentSuccess';
 function AppRoutes() {
   return (
     <Routes>
@@ -55,7 +56,7 @@ function AppRoutes() {
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/checkout" element={<Checkout />} />
       <Route path="/debug" element={<AdminDebug />} />
-
+      <Route path="/payment-success" element={<PaymentSuccess />} />
       {/* PRODUCT DETAIL */}
       <Route 
         path="/product/:id" 
