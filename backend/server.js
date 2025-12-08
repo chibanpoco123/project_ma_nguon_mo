@@ -16,7 +16,7 @@ import PaymentRoutes from "./src/routes/payments.js";
 import ShippingRoutes from "./src/routes/shiping.js";
 import Wishlist from "./src/routes/wishlist.js";
 import socialAuthRoutes from "./src/routes/socialauth.js";
-
+import ProductVariant from "./src/routes/productVariant.js";
 dotenv.config();
 
 const app = express();
@@ -80,6 +80,7 @@ app.use("/api/coupons", couponRoutes);
 app.use("/api/payments", PaymentRoutes);
 app.use("/api/Shipping", ShippingRoutes);
 app.use("/api/whishlist", Wishlist);
+app.use("/api/variant", ProductVariant);
 app.use("/api/auth/social", socialAuthRoutes);
 
 // 🔥 Chạy server (KHÔNG dùng app.listen)
