@@ -162,7 +162,34 @@ const Checkout: React.FC = () => {
           image: item.product_id!.images[0],
         }));
 
-    const orderData = {
+const handlePayment = async () => {
+  const token = localStorage.getItem("accessToken");
+  if (!token) return alert("Bạn chưa đăng nhập!");
+
+  if (!customerName || !customerPhone || !address || !selectedWard)
+    return alert("Vui lòng nhập đầy đủ thông tin giao hàng!");
+
+  const itemsToOrder = buyNowItem
+    ? [{
+        product_id: buyNowItem._id,
+        name: buyNowItem.name,
+        price: buyNowItem.price,
+        quantity: buyNowItem.quantity,
+        image: buyNowItem.images?.[0],
+      }]
+    : cart.map((item) => ({
+        product_id: item.product_id!._id,
+        name: item.product_id!.name,
+        price: item.product_id!.price,
+        quantity: item.quantity,
+        image: item.product_id!.images[0],
+      }));
+
+
+  // 🔥 1. TẠO ORDER TRƯỚC
+  const orderRes = await axios.post(
+    "http://localhost:3000/api/order/",
+    {
       customer_name: customerName,
       customer_phone: customerPhone,
       shipping_address: address,
@@ -176,6 +203,7 @@ const Checkout: React.FC = () => {
       shipping_fee: 0,
       discount: 0,
       total_price: subtotal,
+
     };
 
     try {
@@ -210,6 +238,62 @@ const Checkout: React.FC = () => {
       alert("Đặt hàng thất bại!");
     }
   };
+
+=======
+    },
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
+
+  const orderId = orderRes.data.order._id; // 🔥 LẤY ORDER ID
+
+  // -------------------------------------------------------
+  // 🔥 2. CHUYỂN QUA THANH TOÁN
+  // -------------------------------------------------------
+
+  if (payment === "VNPAY") {
+    const res = await axios.post(
+      "http://localhost:3000/api/payments/vnpay/create",
+      {
+        amount: subtotal,
+        paymentCode: "VNPAY",
+        order_id: orderId, // 🔥 BẮT BUỘC
+      },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+
+    window.location.href = res.data.paymentUrl;
+    return;
+  }
+
+  if (payment === "MOMO") {
+    const res = await axios.post(
+      "http://localhost:3000/api/payments/momo",
+      {
+        amount: subtotal,
+        paymentCode: "MOMO",
+        order_id: orderId, // 🔥 BẮT BUỘC
+      },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+
+    window.location.href = res.data.payUrl;
+    return;
+  }
+
+  // -------------------------------------------------------
+  // 🔥 3. COD → Xóa giỏ
+  // -------------------------------------------------------
+
+  alert("Đặt hàng thành công!");
+  if (!buyNowItem) {
+    await axios.delete("http://localhost:3000/api/cart/clear/all", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  }
+
+  navigate("/");
+};
+
 
   return (
     <div className="checkout-container">
@@ -271,6 +355,10 @@ const Checkout: React.FC = () => {
             <input type="radio" checked={payment === "MOMO"} onChange={() => setPayment("MOMO")} />
             <img src={momo} /><span>Thanh toán MoMo</span>
           </label>
+          <label className="pay-option">
+  <input type="radio" checked={payment === "ATM"} onChange={() => setPayment("ATM")} />
+  <img src={vvnpay} alt="MoMo ATM" /><span>Thanh toán MoMo ATM</span>
+</label>
         </div>
       </div>
 

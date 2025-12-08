@@ -103,11 +103,13 @@ export const getUserOrders = async (req, res) => {
     const orders = await Order.find({ user_id }).sort({ created_at: -1 });
 
     res.json(orders);
+
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Lỗi khi lấy danh sách đơn hàng" });
   }
 };
+
 
 export const getOrderById = async (req, res) => {
   try {

@@ -203,7 +203,7 @@ export const forgotPassword = async (req, res) => {
     const resetToken = jwt.sign(
       { id: user._id, email: user.email },
       process.env.JWT_SECRET || "secretkey",
-      { expiresIn: "30m" }
+      { expiresIn: "1d" }
     );
 
     // 🔹 Lưu reset token vào user (trong production dùng Redis hoặc database)

@@ -95,6 +95,30 @@ function AppRoutes() {
         } 
       />
 
+
+      <Route 
+        path="/men-pants" 
+        element={
+          <>
+            <Header />
+            <MenPants />
+            <Footer />
+          </>
+        } 
+      />
+
+      <Route 
+        path="/products" 
+        element={
+          <>
+            <Header />
+            <AllProducts />
+            <Footer />
+          </>
+        } 
+      />
+
+      {/* ADMIN PROTECTED */}
       <Route 
         path="/men-pants" 
         element={
@@ -129,6 +153,7 @@ function AppRoutes() {
         <Route index element={<AdminDashboard />} />
         <Route path="products" element={<AdminProducts />} />
         <Route path="categories" element={<AdminCategoryList />} />
+
         
         {/* 🔥 2. SỬA DÒNG NÀY (Đổi từ 'orders' thành 'order' và gọi Component AdminOrder) */}
         <Route path="order" element={<AdminOrder />} />

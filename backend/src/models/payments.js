@@ -1,11 +1,11 @@
 import mongoose from "mongoose";
 
 const paymentSchema = new mongoose.Schema({
-  order_id: { type: mongoose.Schema.Types.ObjectId, ref: "Order", unique: true, required: true },
+  order_id: { type: String, required: true },
   user_id: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   payment_date: { 
     type: String, 
-    enum: ["VNPAY", "MOMO", "COD", "BANK_TRANSFER"], 
+    enum: ["VNPAY", "MOMO", "COD", "ATM"], 
     required: true 
   },
   transaction_id: { type: String, unique: true },

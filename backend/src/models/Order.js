@@ -38,7 +38,7 @@ items: [
   // 💳 Thanh toán & giao hàng
   payment_method: { 
     type: String, 
-    enum: ["COD", "VNPAY", "MOMO"], 
+    enum: ["COD", "VNPAY", "MOMO","ATM"], 
     default: "COD" 
   },
   payment_status: { 
