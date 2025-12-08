@@ -80,7 +80,6 @@ export const createMomoPayment = async (req, res) => {
     const requestType = "captureWallet";
     const extraData = "";
 
-    // ---------------- SIGNATURE ----------------
     const rawSignature =
       `accessKey=${accessKey}&amount=${amount}&extraData=${extraData}` +
       `&ipnUrl=${ipnUrl}&orderId=${orderId}&orderInfo=${orderInfo}` +
@@ -92,7 +91,6 @@ export const createMomoPayment = async (req, res) => {
       .update(rawSignature)
       .digest("hex");
 
-    // ---------------- BODY ----------------
     const requestBody = JSON.stringify({
       partnerCode,
       accessKey,

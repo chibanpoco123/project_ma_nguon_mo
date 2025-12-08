@@ -1,5 +1,6 @@
 // src/components/ShortsSection.tsx
 import { Container, Row, Col, Button } from 'react-bootstrap';
+import { Link } from 'react-router-dom';
 import ProductCard from '../ProductCard'; // Tái sử dụng component ProductCard
 
 // --- Dữ liệu mẫu cho khu vực Quần Short ---
@@ -13,10 +14,10 @@ import short3 from '../../assets/short-orgnis-loose.jpg';
 import short4 from '../../assets/short-denim-hoa.jpg';
 
 const shorts = [
-  { tag: 'HÀNG MỚI', imageUrl: short1, title: 'Quần Short Nam Tactical...', price: '349,000₫' },
-  { tag: 'HÀNG MỚI', imageUrl: short2, title: 'Quần Short Jean Nam Dark...', price: '350,000₫' },
-  { tag: 'HÀNG MỚI', imageUrl: short3, title: 'Quần Short Nam Orgnis Loose...', price: '419,000₫' },
-  { tag: 'HÀNG MỚI', imageUrl: short4, title: 'Quần Short Nam Denim Hoa...', price: '349,000₫' },
+  { imageUrl: short1, title: 'Quần Short Nam Tactical...', price: '349,000₫' },
+  { imageUrl: short2, title: 'Quần Short Jean Nam Dark...', price: '350,000₫' },
+  { imageUrl: short3, title: 'Quần Short Nam Orgnis Loose...', price: '419,000₫' },
+  { imageUrl: short4, title: 'Quần Short Nam Denim Hoa...', price: '349,000₫' },
 ];
 
 function Quanshort() {
@@ -36,7 +37,9 @@ function Quanshort() {
             <img src={shortsPromoBanner} alt="Quần Short Mới" className="img-fluid" />
             <div className="promo-content">
               <h2>QUẦN SHORT</h2>
-              <Button variant="light" size="sm">XEM NGAY</Button>
+              <Link to="/men-pants">
+                <Button variant="light" size="sm">XEM NGAY</Button>
+              </Link>
             </div>
           </div>
         </Col>
@@ -59,7 +62,9 @@ function Quanshort() {
 
       {/* Nút "Xem tất cả" */}
       <div className="text-center mt-4">
-        <Button variant="outline-dark">Xem tất cả</Button>
+        <Link to="/men-pants">
+          <Button variant="outline-dark">Xem tất cả</Button>
+        </Link>
       </div>
     </Container>
   );

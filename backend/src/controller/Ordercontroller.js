@@ -35,7 +35,9 @@ export const createOrder = async (req, res) => {
 
     // ❌ Validate thiếu items
     if (!items || !Array.isArray(items) || items.length === 0) {
-      return res.status(400).json({ message: "Danh sách sản phẩm (items) bị thiếu" });
+      return res
+        .status(400)
+        .json({ message: "Danh sách sản phẩm (items) bị thiếu" });
     }
 
     // ❌ Validate thông tin người nhận
@@ -75,10 +77,11 @@ export const createOrder = async (req, res) => {
       message: "Tạo đơn hàng thành công",
       order: newOrder,
     });
-
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Lỗi khi tạo đơn hàng", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Lỗi khi tạo đơn hàng", error: error.message });
   }
 };
 
@@ -86,8 +89,19 @@ export const createOrder = async (req, res) => {
 
 export const getUserOrders = async (req, res) => {
   try {
+    // Nếu là admin -> lấy toàn bộ đơn hàng
+    if (req.user.isAdmin || req.user.role === "admin") {
+      const orders = await Order.find()
+        .populate("user_id", "name email")
+        .sort({ created_at: -1 });
+
+      return res.json(orders);
+    }
+
+    // User thường -> lấy đơn của họ
     const user_id = req.user.id;
     const orders = await Order.find({ user_id }).sort({ created_at: -1 });
+
     res.json(orders);
   } catch (error) {
     console.error(error);
@@ -103,7 +117,8 @@ export const getOrderById = async (req, res) => {
     }
 
     const order = await Order.findById(id).populate("user_id", "name email");
-    if (!order) return res.status(404).json({ message: "Không tìm thấy đơn hàng" });
+    if (!order)
+      return res.status(404).json({ message: "Không tìm thấy đơn hàng" });
 
     res.json(order);
   } catch (error) {
@@ -118,7 +133,8 @@ export const updateOrderStatus = async (req, res) => {
     const { status, payment_status, admin_note } = req.body;
 
     const order = await Order.findById(id);
-    if (!order) return res.status(404).json({ message: "Không tìm thấy đơn hàng" });
+    if (!order)
+      return res.status(404).json({ message: "Không tìm thấy đơn hàng" });
 
     if (status) order.status = status;
     if (payment_status) order.payment_status = payment_status;
@@ -154,14 +170,19 @@ export const updateOrderInfo = async (req, res) => {
     } = req.body;
 
     const order = await Order.findById(id);
-    if (!order) return res.status(404).json({ message: "Không tìm thấy đơn hàng" });
+    if (!order)
+      return res.status(404).json({ message: "Không tìm thấy đơn hàng" });
 
     if (order.user_id.toString() !== userId) {
-      return res.status(403).json({ message: "Bạn không có quyền sửa đơn này" });
+      return res
+        .status(403)
+        .json({ message: "Bạn không có quyền sửa đơn này" });
     }
 
     if (order.status !== "pending") {
-      return res.status(400).json({ message: "Chỉ được chỉnh sửa khi đơn đang pending" });
+      return res
+        .status(400)
+        .json({ message: "Chỉ được chỉnh sửa khi đơn đang pending" });
     }
 
     if (customer_name) order.customer_name = customer_name;
@@ -177,7 +198,10 @@ export const updateOrderInfo = async (req, res) => {
     res.json({ message: "Cập nhật thông tin thành công", order });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Lỗi khi cập nhật đơn hàng", error: error.message });
+    res.status(500).json({
+      message: "Lỗi khi cập nhật đơn hàng",
+      error: error.message,
+    });
   }
 };
 
@@ -192,9 +216,26 @@ export const deleteOrder = async (req, res) => {
   }
 };
 
+// =========================================================
+// 🔥 [PHẦN CHỈNH SỬA] Nâng cấp getAllOrders để hỗ trợ tìm kiếm
+// =========================================================
 export const getAllOrders = async (req, res) => {
   try {
-    const orders = await Order.find()
+    // 🔥 [CODE MỚI] Lấy query search từ URL (VD: ?search=ORD123)
+    const { search } = req.query;
+    let query = {};
+
+    if (search) {
+      query = {
+        $or: [
+          { order_number: { $regex: search, $options: "i" } }, // Tìm theo mã đơn
+          { customer_name: { $regex: search, $options: "i" } }, // Tìm theo tên khách
+        ],
+      };
+    }
+    // Kết thúc phần search
+
+    const orders = await Order.find(query) // Thêm query vào đây
       .populate("user_id", "name email")
       .sort({ created_at: -1 });
 
@@ -215,8 +256,13 @@ export const cancelOrder = async (req, res) => {
       return res.status(404).json({ message: "Không tìm thấy đơn hàng" });
     }
 
-    if (order.user_id.toString() !== userId.toString() && !req.user.isAdmin) {
-      return res.status(403).json({ message: "Không có quyền hủy đơn hàng này" });
+    if (
+      order.user_id.toString() !== userId.toString() &&
+      !req.user.isAdmin
+    ) {
+      return res
+        .status(403)
+        .json({ message: "Không có quyền hủy đơn hàng này" });
     }
 
     if (order.status !== "pending") {
@@ -232,6 +278,52 @@ export const cancelOrder = async (req, res) => {
 
     return res.json({ message: "Đơn hàng đã được hủy thành công", order });
   } catch (error) {
-    res.status(500).json({ message: "Lỗi khi hủy đơn hàng", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Lỗi khi hủy đơn hàng", error: error.message });
+  }
+};
+
+// =========================================================
+// 🔥 [CODE MỚI] API Thống kê cho Dashboard (Admin Home)
+// Dùng để hiển thị: Tổng doanh thu, tổng số đơn, đơn mới...
+// =========================================================
+export const getMonthlyIncome = async (req, res) => {
+  const date = new Date();
+  const lastMonth = new Date(date.setMonth(date.getMonth() - 1));
+
+  try {
+    // 1. Tính tổng doanh thu
+    const income = await Order.aggregate([
+      {
+        $match: {
+          // Chỉ tính đơn đã thanh toán hoặc đã giao
+          status: "delivered", 
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          totalSales: { $sum: "$total_price" },
+        },
+      },
+    ]);
+
+    // 2. Đếm số lượng đơn theo từng trạng thái
+    const orderCounts = await Order.aggregate([
+      {
+        $group: {
+          _id: "$status",
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+
+    res.status(200).json({
+      totalRevenue: income.length > 0 ? income[0].totalSales : 0,
+      ordersByStatus: orderCounts,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Lỗi thống kê", error: error.message });
   }
 };

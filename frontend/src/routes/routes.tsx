@@ -13,66 +13,113 @@ import AdminUsers from '../components/admin/AdminUsers';
 import AdminDebug from '../components/admin/AdminDebug';
 import ProtectedRoute from '../components/admin/ProtectedRoute';
 import Checkout from '../components/page/checkout';
-import Oder from '../components/admin/AdminOrder'; // Trang của Admin
-
-// --- 1. THÊM DÒNG NÀY (Import trang Order của khách) ---
-import Order from '../components/page/Order'; 
-
+import AdminCategoryList from '../components/admin/AdminCategories';
+import ProductDetail from '../components/page/Detail';
+import NewProducts from '../components/page/NewProducts';
+import MenShirt from '../components/page/MenShirt';
+import MenPants from '../components/page/MenPants';
+import AllProducts from '../components/page/AllProducts';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+
+// 🔥 1. THÊM DÒNG IMPORT NÀY
+import AdminOrder from '../components/admin/AdminOrder'; 
 
 function AppRoutes() {
   return (
     <Routes>
-      {/* Route Trang chủ đầy đủ (có Header/Footer) */}
+
+      {/* HOME */}
       <Route 
         path="/" 
         element={
           <>
             <Header />
-            <Home/>
-            <Footer />
-          </>
-        } 
-      />
-      
-      {/* --- 2. THÊM ROUTE CHO KHÁCH HÀNG XEM ĐƠN --- */}
-      {/* Trang danh sách hoặc đơn mới nhất */}
-      <Route 
-        path="/order" 
-        element={
-          <>
-            <Header />
-            <Order />
-            <Footer />
-          </>
-        } 
-      />
-      
-      {/* Trang chi tiết đơn hàng (khi có ID) */}
-      <Route 
-        path="/order/:id" 
-        element={
-          <>
-            <Header />
-            <Order />
+            <Home />
             <Footer />
           </>
         } 
       />
 
-      {/* Các Route khác */}
+      {/* CART */}
+      <Route 
+        path="/cart" 
+        element={
+          <>
+            <Header />
+            <Cart />
+            <Footer />
+          </>
+        } 
+      />
+
       <Route path="/login" element={<Login />} />
       <Route path="/outlet" element={<OutletPage />} />
       <Route path="/search" element={<SearchResultsPage />} />
       <Route path="/reset-password" element={<ResetPassword />} />
-      <Route path="/cart" element={<Cart />} />
       <Route path="/checkout" element={<Checkout />} />
       <Route path="/debug" element={<AdminDebug />} />
-      
-      {/* Admin Routes - Protected */}
+
+      {/* PRODUCT DETAIL */}
       <Route 
-        path="/admin" 
+        path="/product/:id" 
+        element={
+          <>
+            <Header />
+            <ProductDetail />
+            <Footer />
+          </>
+        } 
+      />
+
+      {/* CATEGORY PAGES */}
+      <Route 
+        path="/new" 
+        element={
+          <>
+            <Header />
+            <NewProducts />
+            <Footer />
+          </>
+        } 
+      />
+
+      <Route 
+        path="/men-shirt" 
+        element={
+          <>
+            <Header />
+            <MenShirt />
+            <Footer />
+          </>
+        } 
+      />
+
+      <Route 
+        path="/men-pants" 
+        element={
+          <>
+            <Header />
+            <MenPants />
+            <Footer />
+          </>
+        } 
+      />
+
+      <Route 
+        path="/products" 
+        element={
+          <>
+            <Header />
+            <AllProducts />
+            <Footer />
+          </>
+        } 
+      />
+
+      {/* ADMIN PROTECTED */}
+      <Route 
+        path="/admin"
         element={
           <ProtectedRoute requireAdmin={true}>
             <AdminLayout />
@@ -81,16 +128,17 @@ function AppRoutes() {
       >
         <Route index element={<AdminDashboard />} />
         <Route path="products" element={<AdminProducts />} />
-        <Route path="categories" element={<div>Quản lý Danh mục - Đang phát triển</div>} />
+        <Route path="categories" element={<AdminCategoryList />} />
+        
+        {/* 🔥 2. SỬA DÒNG NÀY (Đổi từ 'orders' thành 'order' và gọi Component AdminOrder) */}
+        <Route path="order" element={<AdminOrder />} />
+
         <Route path="posts" element={<div>Quản lý Bài viết - Đang phát triển</div>} />
         <Route path="contact" element={<div>Liên hệ - Đang phát triển</div>} />
-        
-        {/* Trang Quản lý đơn hàng của Admin */}
-        <Route path="order" element={<Oder/>} />
-        
         <Route path="database" element={<AdminDatabase />} />
         <Route path="users" element={<AdminUsers />} />
       </Route>
+
     </Routes>
   );
 }

@@ -3,17 +3,48 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Container, Row, Col, Button, Form, Card } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
+import axios from "axios";
+
 import '../../css/cart.css';
 
 interface CartItem {
-  id: number;
+  id: string;
   name: string;
-  image: string;
+  image: string | null;
   price: number;
   originalPrice: number;
   quantity: number;
   size?: string;
 }
+
+const getImage = (url: string | undefined | null) => {
+  if (!url) return "/no-image.png";
+
+  // CASE 1: Base64 đúng chuẩn
+  if (url.startsWith("data:image")) {
+    return url.replace(/\s/g, ""); // xoá khoảng trắng hoặc xuống dòng
+  }
+
+  // CASE 2: Ảnh backend /uploads
+  if (url.includes("uploads")) {
+    return "http://localhost:3000/" + url.replace(/\\/g, "/").replace("public/", "");
+  }
+
+  // CASE 3: Ảnh FE /src/assets
+  if (url.includes("assets")) {
+    try {
+      const file = url.split("/assets/")[1];
+      return new URL(`../../assets/${file}`, import.meta.url).href;
+    } catch {
+      return "/no-image.png";
+    }
+  }
+
+  // CASE 4: URL đầy đủ
+  if (url.startsWith("http")) return url;
+
+  return "/no-image.png";
+};
 
 const Cart: React.FC = () => {
   const navigate = useNavigate();
@@ -21,46 +52,81 @@ const Cart: React.FC = () => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
 
-  // Check if user is logged in (check on mount, when location changes, and when window gains focus)
   useEffect(() => {
     const checkLoginStatus = () => {
-      const accessToken = localStorage.getItem('accessToken');
-      setIsLoggedIn(!!accessToken);
+      const token = localStorage.getItem('accessToken');
+      setIsLoggedIn(!!token);
     };
-    
+
     checkLoginStatus();
-    
-    // Check again when window gains focus (user might have logged in in another tab)
     window.addEventListener('focus', checkLoginStatus);
-    
-    return () => {
-      window.removeEventListener('focus', checkLoginStatus);
-    };
-  }, [location]); // Re-check when location changes (e.g., returning from login page)
+    return () => window.removeEventListener('focus', checkLoginStatus);
+  }, [location]);
 
-  // Redirect to home if cart is empty
   useEffect(() => {
-    if (cartItems.length === 0) {
-      navigate('/');
+    const fetchCart = async () => {
+      try {
+        const token = localStorage.getItem("accessToken");
+        if (!token) return;
+
+        const res = await axios.get("http://localhost:3000/api/cart", {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        console.log("API CART RESPONSE:", res.data);
+const mapped = res.data.map((item: any) => {
+  let raw = item.product_id?.images?.[0] || null;
+  let img = getImage(raw);
+
+  // FIX: Nếu getImage trả ra URL die → đổi ngay tại đây
+  if (!img || img.includes("undefined") || img.includes("null")) {
+    img = "/no-image.png";
+  }
+
+  return {
+    id: item._id,
+    name: item.product_id?.name || "Không có tên",
+    image: img, // -> luôn là URL không lỗi
+    price: item.product_id?.price || 0,
+    originalPrice: item.product_id?.originalPrice || 0,
+    quantity: item.quantity,
+  };
+});
+
+
+        setCartItems(mapped);
+      } catch (error) {
+        console.error("❌ Lỗi fetch cart:", error);
+      }
+    };
+
+    fetchCart();
+  }, []);
+
+const removeItem = async (id: string) => {
+  try {
+    const token = localStorage.getItem("accessToken");
+    if (!token) {
+      alert("Bạn phải đăng nhập để xoá sản phẩm!");
+      return;
     }
-  }, [cartItems.length, navigate]);
 
-  const [couponCode, setCouponCode] = useState('');
-  const [appliedCoupon, setAppliedCoupon] = useState<string | null>(null);
-  const [showCouponForm, setShowCouponForm] = useState(false);
+    // GỌI API XOÁ
+    await axios.delete(`http://localhost:3000/api/cart/${id}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
 
-  // Coupons giả lập
-  const coupons: { [key: string]: number } = {
-    'OCT100': 100000,
-    'OCT200': 200000,
-    'SAVE50': 50000
-  };
+    // XOÁ TRÊN FE
+    setCartItems(prev => prev.filter(item => item.id !== id));
 
-  const removeItem = (id: number) => {
-    setCartItems(cartItems.filter(item => item.id !== id));
-  };
+  } catch (err) {
+    console.error("❌ Lỗi xoá sản phẩm:", err);
+    alert("Không thể xoá sản phẩm. Thử lại!");
+  }
+};
 
-  const updateQuantity = (id: number, newQuantity: number) => {
+
+  const updateQuantity = (id: string, newQuantity: number) => {
     if (newQuantity <= 0) {
       removeItem(id);
       return;
@@ -70,6 +136,16 @@ const Cart: React.FC = () => {
         item.id === id ? { ...item, quantity: newQuantity } : item
       )
     );
+  };
+
+  const [couponCode, setCouponCode] = useState('');
+  const [appliedCoupon, setAppliedCoupon] = useState<string | null>(null);
+  const [showCouponForm, setShowCouponForm] = useState(false);
+
+  const coupons: { [key: string]: number } = {
+    'OCT100': 100000,
+    'OCT200': 200000,
+    'SAVE50': 50000
   };
 
   const applyCoupon = () => {
@@ -84,27 +160,24 @@ const Cart: React.FC = () => {
 
   const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const discount = appliedCoupon ? coupons[appliedCoupon] : 0;
-  const shipping = 0; // Free shipping
+  const shipping = 0;
   const total = subtotal - discount + shipping;
 
   const formatPrice = (price: number) => {
     return price.toLocaleString('vi-VN') + 'đ';
   };
 
-  // Handle checkout - redirect to login if not logged in
-  const handleCheckout = () => {
-    if (!isLoggedIn) {
-      alert('Vui lòng đăng nhập để thanh toán!');
-      navigate('/login');
-      return;
-    }
-    // TODO: Implement checkout logic here
-    alert('Chức năng thanh toán đang được phát triển!');
-  };
+const handleCheckout = () => {
+  if (!isLoggedIn) {
+    navigate('/login');  // bắt đăng nhập trước
+    return;
+  }
 
-  // Don't render if cart is empty (will redirect)
+  navigate('/checkout'); // login rồi thì cho checkout
+};
+
   if (cartItems.length === 0) {
-    return null;
+    return <div className="text-center mt-5">Giỏ hàng trống</div>;
   }
 
   return (
@@ -123,8 +196,11 @@ const Cart: React.FC = () => {
                   <Card.Body>
                     <Row className="align-items-center">
                       <Col xs="auto">
-                        <img src={item.image} alt={item.name} className="cart-item-image" />
+<img src={item.image} alt={item.name} className="cart-img" />
+
+
                       </Col>
+
                       <Col>
                         <h6 className="mb-2">{item.name}</h6>
                         {item.size && <small className="text-muted">Size: {item.size}</small>}
@@ -133,6 +209,7 @@ const Cart: React.FC = () => {
                           <span className="original-price ms-2">{formatPrice(item.originalPrice)}</span>
                         </div>
                       </Col>
+
                       <Col xs="auto">
                         <Form.Group className="quantity-group">
                           <Button
@@ -158,6 +235,7 @@ const Cart: React.FC = () => {
                           </Button>
                         </Form.Group>
                       </Col>
+
                       <Col xs="auto">
                         <Button
                           variant="light"
@@ -172,56 +250,13 @@ const Cart: React.FC = () => {
                 </Card>
               ))}
             </div>
-
-            {/* Delivery Info */}
-            <div className="delivery-section mt-4 p-3">
-              <h5>📦 Ước tính thời gian giao hàng</h5>
-              <Form className="mt-3">
-                <Form.Group className="mb-3">
-                  <Form.Label>Tỉnh/Thành phố</Form.Label>
-                  <Form.Select>
-                    <option>Chọn Quận/Huyện</option>
-                  </Form.Select>
-                </Form.Group>
-                <Form.Group className="mb-3">
-                  <Form.Label>Quận/Huyện</Form.Label>
-                  <Form.Select>
-                    <option>Chọn Phường/Xã</option>
-                  </Form.Select>
-                </Form.Group>
-              </Form>
-            </div>
-
-            {/* Payment Methods */}
-            <div className="payment-section mt-4 p-3">
-              <h5>💳 Hình thức thanh toán</h5>
-              <div className="payment-methods mt-3">
-                <Form.Check
-                  type="radio"
-                  id="cod"
-                  label="COD - Thanh toán khi giao hàng (CCCD)"
-                  name="payment"
-                  defaultChecked
-                  className="mb-2"
-                />
-                <Form.Check
-                  type="radio"
-                  id="online"
-                  label="Online - Thanh toán trực tuyến"
-                  name="payment"
-                  className="mb-2"
-                />
-              </div>
-            </div>
           </Col>
 
-          {/* Order Summary */}
           <Col lg={4}>
             <Card className="order-summary sticky-top">
               <Card.Body>
                 <h5 className="mb-3">Ưu Đãi Dành Cho Bạn</h5>
 
-                {/* Coupon Section */}
                 <div className="coupon-section mb-3">
                   {!showCouponForm ? (
                     <Button
@@ -255,7 +290,6 @@ const Cart: React.FC = () => {
                   )}
                 </div>
 
-                {/* Discount Codes */}
                 <div className="discount-codes mb-3">
                   <div className="discount-badge">
                     <strong>OCT100</strong>
@@ -269,7 +303,6 @@ const Cart: React.FC = () => {
 
                 <hr />
 
-                {/* Price Details */}
                 <div className="price-details">
                   <div className="price-row">
                     <span>Tạm tính:</span>
@@ -285,12 +318,6 @@ const Cart: React.FC = () => {
                       <span>-{formatPrice(discount)}</span>
                     </div>
                   )}
-                  {appliedCoupon && (
-                    <div className="price-row">
-                      <span>Chương trình khách hàng thân thiết:</span>
-                      <span>0đ</span>
-                    </div>
-                  )}
                   <hr />
                   <div className="total-row">
                     <span>Tổng:</span>
@@ -298,19 +325,15 @@ const Cart: React.FC = () => {
                   </div>
                 </div>
 
-                <Button 
-                  variant="primary" 
-                  size="lg" 
+                <Button
+                  variant="primary"
+                  size="lg"
                   className="w-100 mt-3"
                   onClick={handleCheckout}
                 >
                   {isLoggedIn ? 'Thanh toán' : 'Đăng nhập để thanh toán'}
                 </Button>
-                {!isLoggedIn && (
-                  <p className="text-center text-muted mt-2 small">
-                    Vui lòng đăng nhập để tiếp tục thanh toán
-                  </p>
-                )}
+
               </Card.Body>
             </Card>
           </Col>
