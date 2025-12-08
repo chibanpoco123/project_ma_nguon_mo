@@ -1,20 +1,37 @@
 import express from "express";
+import { verifyToken } from "../middlewares/auth.js";
 import {
   createPayment,
   getPayments,
   getPaymentById,
   updatePayment,
   deletePayment,
-  createMomoPayment
+  createMomoPayment,
+  createMomoATM,
+  createVNPayPayment,
+  vnpayReturn,
 } from "../controller/paymmentscontroller.js";
 
 const router = express.Router();
 
+// CREATE
 router.post("/", createPayment);
+
+// MOMO PAYMENT
+router.post("/momo", createMomoPayment);
+router.post("/atm", createMomoATM); // thêm route ATM
+router.post("/vnpay/create", verifyToken,createVNPayPayment);
+
+
+// READ
 router.get("/", getPayments);
 router.get("/:id", getPaymentById);
+router.get("/vnpay/return", vnpayReturn);
+// UPDATE
 router.put("/:id", updatePayment);
+
+// DELETE
 router.delete("/:id", deletePayment);
-router.post("/momo", createMomoPayment);
+
 
 export default router;
