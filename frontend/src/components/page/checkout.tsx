@@ -137,6 +137,31 @@ const Checkout: React.FC = () => {
   };
 
   // -------------------- Tạo đơn hàng --------------------
+  const handlePayment = async () => {
+    const token = localStorage.getItem("accessToken");
+    if (!token) return alert("Bạn chưa đăng nhập!");
+
+    if (!customerName || !customerPhone || !address || !selectedWard)
+      return alert("Vui lòng nhập đầy đủ thông tin giao hàng!");
+
+    const itemsToOrder = buyNowItem
+      ? [
+          {
+            product_id: buyNowItem._id,
+            name: buyNowItem.name,
+            price: buyNowItem.price,
+            quantity: buyNowItem.quantity,
+            image: buyNowItem.images?.[0],
+          },
+        ]
+      : cart.map((item) => ({
+          product_id: item.product_id!._id,
+          name: item.product_id!.name,
+          price: item.product_id!.price,
+          quantity: item.quantity,
+          image: item.product_id!.images[0],
+        }));
+
 const handlePayment = async () => {
   const token = localStorage.getItem("accessToken");
   if (!token) return alert("Bạn chưa đăng nhập!");
@@ -160,6 +185,7 @@ const handlePayment = async () => {
         image: item.product_id!.images[0],
       }));
 
+
   // 🔥 1. TẠO ORDER TRƯỚC
   const orderRes = await axios.post(
     "http://localhost:3000/api/order/",
@@ -177,6 +203,43 @@ const handlePayment = async () => {
       shipping_fee: 0,
       discount: 0,
       total_price: subtotal,
+
+    };
+
+    try {
+      if (payment === "MOMO") {
+        const res = await axios.post(
+          "http://localhost:3000/api/payments/momo",
+          { amount: subtotal },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+
+        if (res.data.payUrl) window.location.href = res.data.payUrl;
+        return;
+      }
+
+      await axios.post(
+        "http://localhost:3000/api/Order/",
+        orderData,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      alert("Đặt hàng thành công!");
+
+      if (!buyNowItem) {
+        await axios.delete("http://localhost:3000/api/cart/clear/all", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      }
+
+      navigate("/");
+    } catch (err) {
+      console.error(err);
+      alert("Đặt hàng thất bại!");
+    }
+  };
+
+=======
     },
     { headers: { Authorization: `Bearer ${token}` } }
   );

@@ -21,6 +21,10 @@ import MenPants from '../components/page/MenPants';
 import AllProducts from '../components/page/AllProducts';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+
+// 🔥 1. THÊM DÒNG IMPORT NÀY
+import AdminOrder from '../components/admin/AdminOrder'; 
+
 function AppRoutes() {
   return (
     <Routes>
@@ -91,6 +95,7 @@ function AppRoutes() {
         } 
       />
 
+
       <Route 
         path="/men-pants" 
         element={
@@ -115,7 +120,30 @@ function AppRoutes() {
 
       {/* ADMIN PROTECTED */}
       <Route 
-        path="/admin" 
+        path="/men-pants" 
+        element={
+          <>
+            <Header />
+            <MenPants />
+            <Footer />
+          </>
+        } 
+      />
+
+      <Route 
+        path="/products" 
+        element={
+          <>
+            <Header />
+            <AllProducts />
+            <Footer />
+          </>
+        } 
+      />
+
+      {/* ADMIN PROTECTED */}
+      <Route 
+        path="/admin"
         element={
           <ProtectedRoute requireAdmin={true}>
             <AdminLayout />
@@ -125,9 +153,13 @@ function AppRoutes() {
         <Route index element={<AdminDashboard />} />
         <Route path="products" element={<AdminProducts />} />
         <Route path="categories" element={<AdminCategoryList />} />
+
+        
+        {/* 🔥 2. SỬA DÒNG NÀY (Đổi từ 'orders' thành 'order' và gọi Component AdminOrder) */}
+        <Route path="order" element={<AdminOrder />} />
+
         <Route path="posts" element={<div>Quản lý Bài viết - Đang phát triển</div>} />
         <Route path="contact" element={<div>Liên hệ - Đang phát triển</div>} />
-        <Route path="orders" element={<div>Đơn hàng - Đang phát triển</div>} />
         <Route path="database" element={<AdminDatabase />} />
         <Route path="users" element={<AdminUsers />} />
       </Route>

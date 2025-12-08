@@ -39,6 +39,9 @@ console.log("MONGO_URI =", process.env.MONGO_URI);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Serve static files from uploads directory
+app.use('/uploads', express.static('uploads'));
 app.use('/uploads', express.static('uploads'));
 
 mongoose.connect(process.env.MONGO_URI)
@@ -77,6 +80,11 @@ app.use("/api/cart", cartRoutes);
 app.use("/api/Order", OrderRoutes); 
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/coupons", couponRoutes);
+
+app.use("/api/payments",PaymentRoutes)
+app.use("/api/Shipping",ShippingRoutes)
+app.use("/api/whishlist",Wishlist)
+
 app.use("/api/payments", PaymentRoutes);
 app.use("/api/Shipping", ShippingRoutes);
 app.use("/api/whishlist", Wishlist);
