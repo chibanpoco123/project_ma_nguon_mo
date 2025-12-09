@@ -21,6 +21,8 @@ import MenPants from '../components/page/MenPants';
 import AllProducts from '../components/page/AllProducts';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import Profile from '../components/page/Profile';
+
 
 function AppRoutes() {
   return (
@@ -38,6 +40,19 @@ function AppRoutes() {
         } 
       />
 
+      {/* PROFILE */}
+      <Route 
+        path="/profile" 
+        element={
+          <ProtectedRoute>
+            <>
+              <Header />
+              <Profile />
+              <Footer />
+            </>
+          </ProtectedRoute>
+        } 
+      />
       {/* CART */}
       <Route 
         path="/cart" 

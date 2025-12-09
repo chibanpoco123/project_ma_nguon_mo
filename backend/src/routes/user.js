@@ -9,7 +9,14 @@ import {
   refreshToken,
   createUser,
   forgotPassword,
-  resetPassword
+  resetPassword,
+  getCurrentUser,
+  addShippingAddress,
+  updateShippingAddress,
+  deleteShippingAddress,
+  addPaymentMethod,
+  deletePaymentMethod,
+  changePassword,
 } from "../controller/usercontroller.js";
 import { verifyToken, isAdmin } from "../middlewares/auth.js";
 
@@ -19,13 +26,25 @@ router.post("/register", registerUser);
 router.post("/login", loginUser);
 
 
-// 🆕 Quên mật khẩu
+// Quên mật khẩu
 router.post("/forgot-password", forgotPassword);
 
-// 🆕 Reset mật khẩu
+//  Reset mật khẩu
 router.post("/reset-password", resetPassword);
+// Lấy thông tin user hiện tại
+router.get("/me", verifyToken, getCurrentUser);
 
-// 🆕 👉 ADMIN tạo người dùng ()
+
+//Địa chỉ giao hàng
+router.post("/me/shipping-addresses", verifyToken, addShippingAddress);
+router.put("/me/shipping-addresses/:addressId", verifyToken, updateShippingAddress);
+router.delete("/me/shipping-addresses/:addressId", verifyToken, deleteShippingAddress);
+
+router.post("/me/payment-methods", verifyToken, addPaymentMethod);
+router.delete("/me/payment-methods/:methodId", verifyToken, deletePaymentMethod);
+
+// Đổi mật khẩu
+router.post("/me/change-password", verifyToken, changePassword);
 
 // ADMIN tạo người dùng ()
 
