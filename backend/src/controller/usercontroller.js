@@ -231,6 +231,21 @@ export const forgotPassword = async (req, res) => {
   }
 };
 
+
+// Lấy thông tin user hiện tại (từ token )
+export const getCurrentUser = async (req, res) => {
+  try {
+    // req.user đã được set bởi verifyToken middleware
+    const user = await User.findById(req.user._id).select("-password");
+    if (!user) {
+      return res.status(404).json({ message: "Không tìm thấy người dùng" });
+    }
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({ message: "Lỗi server", error: error.message });
+  }
+};
+
 // 🔹 Reset mật khẩu
 export const resetPassword = async (req, res) => {
   try {
@@ -286,6 +301,149 @@ export const resetPassword = async (req, res) => {
     if (error.name === "TokenExpiredError") {
       return res.status(401).json({ message: "Token đã hết hạn" });
     }
+    res.status(500).json({ message: "Lỗi server", error: error.message });
+  }
+};
+
+
+// Thêm địa chỉ giao hàng
+export const addShippingAddress = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) return res.status(404).json({ message: "Không tìm thấy người dùng" });
+
+    const { name, phone, address, ward, district, province, isDefault, note } = req.body;
+
+    // Nếu đặt làm mặc định, bỏ mặc định của các địa chỉ khác
+    if (isDefault) {
+      user.shippingAddresses.forEach(addr => addr.isDefault = false);
+    }
+
+    user.shippingAddresses.push({
+      name,
+      phone,
+      address,
+      ward,
+      district,
+      province,
+      isDefault: isDefault || false,
+      note,
+    });
+
+    await user.save();
+    res.json({ message: "Thêm địa chỉ thành công", user });
+  } catch (error) {
+    res.status(500).json({ message: "Lỗi server", error: error.message });
+  }
+};
+
+// Cập nhật địa chỉ giao hàng
+export const updateShippingAddress = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) return res.status(404).json({ message: "Không tìm thấy người dùng" });
+
+    const { addressId } = req.params;
+    const updates = req.body;
+
+    const address = user.shippingAddresses.id(addressId);
+    if (!address) return res.status(404).json({ message: "Không tìm thấy địa chỉ" });
+
+    // Nếu đặt làm mặc định, bỏ mặc định của các địa chỉ khác
+    if (updates.isDefault) {
+      user.shippingAddresses.forEach(addr => {
+        if (addr._id.toString() !== addressId) addr.isDefault = false;
+      });
+    }
+
+    Object.assign(address, updates);
+    await user.save();
+    res.json({ message: "Cập nhật địa chỉ thành công", user });
+  } catch (error) {
+    res.status(500).json({ message: "Lỗi server", error: error.message });
+  }
+};
+
+// Xóa địa chỉ giao hàng
+export const deleteShippingAddress = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) return res.status(404).json({ message: "Không tìm thấy người dùng" });
+
+    const { addressId } = req.params;
+    user.shippingAddresses.pull(addressId);
+    await user.save();
+    res.json({ message: "Xóa địa chỉ thành công", user });
+  } catch (error) {
+    res.status(500).json({ message: "Lỗi server", error: error.message });
+  }
+};
+
+// Thêm phương thức thanh toán
+export const addPaymentMethod = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) return res.status(404).json({ message: "Không tìm thấy người dùng" });
+
+    const { type, cardNumber, cardHolder, expiryDate, phone, isDefault } = req.body;
+
+    // Nếu đặt làm mặc định, bỏ mặc định của các phương thức khác
+    if (isDefault) {
+      user.paymentMethods.forEach(method => method.isDefault = false);
+    }
+
+    user.paymentMethods.push({
+      type,
+      cardNumber,
+      cardHolder,
+      expiryDate,
+      phone,
+      isDefault: isDefault || false,
+    });
+
+    await user.save();
+    res.json({ message: "Thêm phương thức thanh toán thành công", user });
+  } catch (error) {
+    res.status(500).json({ message: "Lỗi server", error: error.message });
+  }
+};
+
+// Xóa phương thức thanh toán
+export const deletePaymentMethod = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) return res.status(404).json({ message: "Không tìm thấy người dùng" });
+
+    const { methodId } = req.params;
+    user.paymentMethods.pull(methodId);
+    await user.save();
+    res.json({ message: "Xóa phương thức thanh toán thành công", user });
+  } catch (error) {
+    res.status(500).json({ message: "Lỗi server", error: error.message });
+  }
+};
+
+// Đổi mật khẩu
+export const changePassword = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) return res.status(404).json({ message: "Không tìm thấy người dùng" });
+
+    const { currentPassword, newPassword } = req.body;
+
+    // Kiểm tra mật khẩu hiện tại
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+      return res.status(401).json({ message: "Mật khẩu hiện tại không đúng" });
+    }
+
+    // Hash mật khẩu mới
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+    await user.save();
+
+    res.json({ message: "Đổi mật khẩu thành công" });
+  } catch (error) {
     res.status(500).json({ message: "Lỗi server", error: error.message });
   }
 };
