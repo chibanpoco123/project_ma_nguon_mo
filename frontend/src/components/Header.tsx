@@ -54,7 +54,14 @@ function Header() {
 
             {user ? (
               <div className="d-flex align-items-center gap-2">
-                <span>{user.name}</span>
+                <span 
+                  style={{ cursor: "pointer", color: "#007bff", textDecoration: "underline" }}
+                  onClick={() => navigate("/profile")}
+                  onMouseEnter={(e) => e.currentTarget.style.color = "#0056b3"}
+                  onMouseLeave={(e) => e.currentTarget.style.color = "#007bff"}
+                >
+                  {user.name}
+                </span>
                 <button 
                   className="btn btn-outline-danger btn-sm"
                   onClick={handleLogout}
@@ -73,5 +80,4 @@ function Header() {
     </Navbar>
   );
 }
-
 export default Header;

@@ -18,9 +18,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       validate: {
         validator: function(v) {
-          // If password is empty/null (OAuth users), allow it
           if (!v || v === '') return true;
-          // If password exists, it must be at least 6 characters
           return v.length >= 6;
         },
         message: "Mật khẩu ít nhất 6 ký tự khi được cung cấp"
@@ -40,7 +38,6 @@ const userSchema = new mongoose.Schema(
       unique: true,
       sparse: true,
     },
-
     address: {
       type: String,
       trim: true,
@@ -50,10 +47,68 @@ const userSchema = new mongoose.Schema(
       enum: ["customer", "admin", "staff"],
       default: "customer",
     },
-
     avatar: {
       type: String,
       default: "",
+    },
+    // Thông tin cá nhân bổ sung
+    gender: {
+      type: String,
+      enum: ["male", "female", "other"],
+      default: null,
+    },
+    dateOfBirth: {
+      type: Date,
+      default: null,
+    },
+    // Địa chỉ giao hàng (nhiều địa chỉ)
+    shippingAddresses: [{
+      name: { type: String, required: true },
+      phone: { type: String, required: true },
+      address: { type: String, required: true },
+      ward: { type: String },
+      district: { type: String },
+      province: { type: String },
+      isDefault: { type: Boolean, default: false },
+      note: { type: String },
+    }],
+    //  Phương thức thanh toán
+    paymentMethods: [{
+      type: { 
+        type: String, 
+        enum: ["credit_card", "debit_card", "momo", "zalopay", "vnpay", "paypal"],
+        required: true 
+      },
+      cardNumber: { type: String },
+      cardHolder: { type: String },
+      expiryDate: { type: String },
+      cvv: { type: String },
+      phone: { type: String }, // Cho ví điện tử
+      isDefault: { type: Boolean, default: false },
+    }],
+    // Cấp độ thành viên
+    membershipLevel: {
+      type: String,
+      enum: ["bronze", "silver", "gold", "platinum"],
+      default: "bronze",
+    },
+    membershipPoints: {
+      type: Number,
+      default: 0,
+    },
+    // Thiết lập tài khoản
+    language: {
+      type: String,
+      default: "vi",
+    },
+    timezone: {
+      type: String,
+      default: "Asia/Ho_Chi_Minh",
+    },
+    privacySettings: {
+      showEmail: { type: Boolean, default: false },
+      showPhone: { type: Boolean, default: false },
+      allowMarketing: { type: Boolean, default: true },
     },
     is_active: {
       type: Boolean,
