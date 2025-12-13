@@ -9,7 +9,7 @@ import {
   getAllOrders,
   cancelOrder,
   updateOrderInfo
-} from "../controller/Ordercontroller.js";
+} from "../controller/Order.controller.js";
 const router = express.Router();
 router.post("/", verifyToken, createOrder);
 router.get("/", verifyToken, getUserOrders);

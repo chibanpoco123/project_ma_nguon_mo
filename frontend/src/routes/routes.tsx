@@ -170,7 +170,6 @@ function AppRoutes() {
         <Route path="categories" element={<AdminCategoryList />} />
 
         
-        {/* 🔥 2. SỬA DÒNG NÀY (Đổi từ 'orders' thành 'order' và gọi Component AdminOrder) */}
         <Route path="order" element={<AdminOrder />} />
 
         <Route path="posts" element={<div>Quản lý Bài viết - Đang phát triển</div>} />

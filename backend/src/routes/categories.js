@@ -5,7 +5,7 @@ import {
   createCategory,
   updateCategory,
   deleteCategory,
-} from "../controller/controllercategories.js";
+} from "../controller/categories.controller.js";
 
 import { verifyToken, isAdmin } from "../middlewares/auth.js";
 

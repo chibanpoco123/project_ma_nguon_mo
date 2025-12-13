@@ -10,7 +10,7 @@ import {
   createMomoATM,
   createVNPayPayment,
   vnpayReturn,
-} from "../controller/paymmentscontroller.js";
+} from "../controller/paymments.controller.js";
 
 const router = express.Router();
 

@@ -5,16 +5,12 @@ import { Container, Row, Col, Button } from 'react-bootstrap';
 import ProductCard from '../ProductCard';
 // Giả định sử dụng React Router/Next.js Link cho việc chuyển trang
 import { Link } from 'react-router-dom'; 
-
 // Banner
 import tShirtPromoBanner from '../../assets/aothun-promo-banner.jpg'; 
-import newArrivalsBanner from '../../assets/new-arrivals-banner.jpg'; // Dữ liệu mẫu
-
 interface Product {
     imageUrl: string;
     title: string;
     price: string;
-    // *** THÊM TRƯỜNG ID CẦN THIẾT CHO ROUTING ***
     productId: string;
     is_new?: boolean;
     updated_at?: string;

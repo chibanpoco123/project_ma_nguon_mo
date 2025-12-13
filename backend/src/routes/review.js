@@ -4,7 +4,7 @@ import {
   createReview,
   getReviewsByProduct,
   deleteReview,
-} from "../controller/reviewcontroller.js";
+} from "../controller/review.controller.js";
 const router = express.Router();
 router.post("/", verifyToken, createReview);
 router.get("/:productId", getReviewsByProduct);

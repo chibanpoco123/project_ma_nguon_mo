@@ -4,7 +4,7 @@ import {
   facebookCallback,
   socialLoginSuccess,
   socialLogout,
-} from "../controller/socialauthcontroller.js";
+} from "../controller/socialauth.controller.js";
 
 const router = express.Router();
 
