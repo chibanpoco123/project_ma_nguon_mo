@@ -32,9 +32,11 @@ const statusVariant: Record<string, string> = {
 
 const OrderHistory: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
+  const [allOrders, setAllOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [openRow, setOpenRow] = useState<string | null>(null);
+  const [filterPaymentStatus, setFilterPaymentStatus] = useState<string>('all');
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -44,7 +46,8 @@ const OrderHistory: React.FC = () => {
         const res = await axios.get("http://localhost:3000/api/orders", {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setOrders(res.data || []);
+        const fetchedOrders = res.data || [];
+        setAllOrders(fetchedOrders);
       } catch (err: any) {
         setError(err.response?.data?.message || "Không thể tải lịch sử đơn hàng");
       } finally {
@@ -54,6 +57,15 @@ const OrderHistory: React.FC = () => {
 
     fetchOrders();
   }, []);
+
+  // Filter orders khi filterPaymentStatus thay đổi
+  useEffect(() => {
+    if (filterPaymentStatus === 'all') {
+      setOrders(allOrders);
+    } else {
+      setOrders(allOrders.filter((order: Order) => order.payment_status === filterPaymentStatus));
+    }
+  }, [filterPaymentStatus, allOrders]);
 
   if (loading) {
     return (
@@ -80,7 +92,26 @@ const OrderHistory: React.FC = () => {
 
   return (
     <Card>
-      <Card.Header>Lịch sử mua sắm</Card.Header>
+      <Card.Header>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <span>Lịch sử mua sắm</span>
+          <select
+            value={filterPaymentStatus}
+            onChange={(e) => setFilterPaymentStatus(e.target.value)}
+            title="Lọc theo trạng thái thanh toán"
+            style={{ 
+              padding: '6px 12px', 
+              borderRadius: '4px', 
+              border: '1px solid #ccc',
+              fontSize: '14px'
+            }}
+          >
+            <option value="all">Tất cả đơn hàng</option>
+            <option value="paid">Đã thanh toán</option>
+            <option value="pending">Chờ thanh toán</option>
+          </select>
+        </div>
+      </Card.Header>
       <Card.Body>
         {orders.length === 0 ? (
           <p className="text-muted mb-0">Bạn chưa có đơn hàng nào.</p>

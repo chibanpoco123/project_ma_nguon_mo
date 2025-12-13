@@ -6,7 +6,7 @@ import {
   createVariant,
   updateVariant,
   deleteVariant,
-} from "../controller/ProductVariant.js"
+} from "../controller/ProductVariant.controller.js"
 
 const router = express.Router();
 

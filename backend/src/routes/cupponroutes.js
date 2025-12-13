@@ -5,7 +5,7 @@ import {
   updateCoupon,
   deleteCoupon,
   applyCoupon,
-} from "../controller/cupponcontroller.js";
+} from "../controller/cuppon.controller.js";
 const router = express.Router();
 router.get("/", getCoupons);
 router.post("/", createCoupon);

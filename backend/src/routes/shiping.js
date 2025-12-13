@@ -5,7 +5,7 @@ import {
   getShippingById,
   updateShipping,
   deleteShipping
-} from "../controller/shippingcontroller.js";
+} from "../controller/shipping.controller.js";
 
 const router = express.Router();
 

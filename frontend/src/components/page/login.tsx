@@ -72,6 +72,7 @@ const LoginPage: React.FC = () => {
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [regPassword, setRegPassword] = useState("");
+  const [confirmPassword,setConfirmPassword] = useState("")
 
   // Forgot Password Modal state
   const [showForgotModal, setShowForgotModal] = useState(false);
@@ -230,7 +231,12 @@ const handleGoogleResponse = useCallback(
 
   // Xử lý register
   const handleRegister = async (e: React.FormEvent) => {
+
     e.preventDefault();
+      if (regPassword !== confirmPassword) {
+    alert("⚠️ Mật khẩu nhập lại không khớp!");
+    return;
+  }
     try {
       const res = await axios.post("http://localhost:3000/api/users/register", {
         name,
@@ -374,6 +380,13 @@ const handleGoogleResponse = useCallback(
               value={regPassword}
               onChange={(e) => setRegPassword(e.target.value)}
             />
+              <input
+    type="password"
+    placeholder="Nhập lại mật khẩu"
+    value={confirmPassword}
+    onChange={(e) => setConfirmPassword(e.target.value)}
+  />
+
             <button type="submit" className="btn-login">
               ĐĂNG KÝ
             </button>

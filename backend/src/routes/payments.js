@@ -10,7 +10,8 @@ import {
   createMomoATM,
   createVNPayPayment,
   vnpayReturn,
-} from "../controller/paymmentscontroller.js";
+   momoIPN,
+} from "../controller/paymments.controller.js";
 
 const router = express.Router();
 
@@ -20,7 +21,8 @@ router.post("/", createPayment);
 // MOMO PAYMENT
 router.post("/momo", createMomoPayment);
 router.post("/atm", createMomoATM); // thêm route ATM
-router.post("/vnpay/create", verifyToken,createVNPayPayment);
+router.post("/momo/ipn", momoIPN); // MOMO IPN callback (không cần token vì là webhook)
+router.post("/vnpay/create", verifyToken, createVNPayPayment);
 
 
 // READ

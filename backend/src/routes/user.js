@@ -17,7 +17,7 @@ import {
   addPaymentMethod,
   deletePaymentMethod,
   changePassword,
-} from "../controller/usercontroller.js";
+} from "../controller/user.controller.js";
 import { verifyToken, isAdmin } from "../middlewares/auth.js";
 
 const router = express.Router();

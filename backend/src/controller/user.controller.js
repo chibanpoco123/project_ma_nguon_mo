@@ -156,6 +156,12 @@ export const getUserById = async (req, res) => {
 
 export const updateUser = async (req, res) => {
   try {
+     const userId = req.params.id;
+
+    // Không có ID → báo lỗi ngay (tránh Cast to ObjectId)
+    if (!userId || userId === "undefined") {
+      return res.status(400).json({ message: "Thiếu ID người dùng" });
+    }
     if (req.user.role !== "admin" && req.user.id !== req.params.id) {
       return res.status(403).json({ message: "Bạn không có quyền sửa người khác" });
     }

@@ -22,7 +22,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = () => {
           <div className="admin-header-links">
             <Link to="/">Vào trang web</Link>
             <Link to="/admin/contact">Liên hệ</Link>
-            <Link to="/admin/orders">Đơn hàng</Link>
+            <Link to="/admin/order">Đơn hàng</Link>
           </div>
         </div>
       </header>
@@ -48,6 +48,12 @@ const AdminLayout: React.FC<AdminLayoutProps> = () => {
                 className={`admin-sidebar-item ${isActive('/admin/products')}`}
               >
                 <span>📦 Sản phẩm</span>
+              </Link>
+              <Link 
+                to="/admin/reviews" 
+                className={`admin-sidebar-item ${isActive('/admin/reviews')}`}
+              >
+                <span>⭐ Đánh giá sản phẩm</span>
               </Link>
               <Link 
                 to="/admin/posts" 
