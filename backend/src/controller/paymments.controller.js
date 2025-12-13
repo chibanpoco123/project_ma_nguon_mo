@@ -208,6 +208,68 @@ export const createMomoPayment = async (req, res) => {
     return res.status(500).json({ message: "Payment error", error });
   }
 };
+
+// =================================================================
+// ⚡ API 3: MOMO IPN Callback – Cập nhật khi thanh toán thành công
+// =================================================================
+export const momoIPN = async (req, res) => {
+  try {
+    const { orderId, resultCode, amount } = req.body;
+
+    // Tìm order từ orderId (có thể là orderId hoặc requestId từ MOMO)
+    const order = await Order.findOne({ 
+      order_number: orderId 
+    }).populate('items.product_id');
+
+    if (!order) {
+      return res.status(404).json({ message: "Không tìm thấy đơn hàng" });
+    }
+
+    // Tìm payment record
+    const payment = await Payment.findOne({ order_id: order._id });
+
+    if (resultCode === 0) {
+      // Thanh toán thành công
+      if (payment) {
+        await Payment.findByIdAndUpdate(payment._id, {
+          status: "success",
+          paid_at: new Date(),
+        });
+      }
+
+      // Cập nhật order
+      await Order.findByIdAndUpdate(order._id, {
+        status: "confirmed",
+        payment_status: "paid", // ✅ CẬP NHẬT PAYMENT_STATUS
+      });
+
+      return res.status(200).json({ 
+        message: "IPN processed successfully",
+        orderId: order._id 
+      });
+    } else {
+      // Thanh toán thất bại
+      if (payment) {
+        await Payment.findByIdAndUpdate(payment._id, {
+          status: "failed",
+        });
+      }
+
+      await Order.findByIdAndUpdate(order._id, {
+        payment_status: "failed",
+      });
+
+      return res.status(200).json({ message: "Payment failed" });
+    }
+  } catch (error) {
+    console.error("MOMO IPN ERROR:", error);
+    return res.status(500).json({ 
+      message: "IPN processing error", 
+      error: error.message 
+    });
+  }
+};
+
 // vn pay
 // =================================================================
 // 🔥 VNPay PAYMENT
@@ -339,17 +401,15 @@ export const vnpayReturn = async (req, res) => {
                 orderId,
                 {
                     status: "confirmed", // CHỌN STATUS ĐÚNG TRONG ENUM
+                    payment_status: "paid", // ✅ CẬP NHẬT PAYMENT_STATUS THÀNH PAID
                     payment_id: updatedPayment._id,
                 },
                 { new: true }
             );
 
-            return res.json({
-                status: "success",
-                message: "Thanh toán thành công!",
-                payment: updatedPayment,
-                order: updatedOrder,
-            });
+            // Redirect về frontend với thông báo thành công
+            const redirectUrl = `http://localhost:5173/payment-success?orderId=${orderId}&status=success`;
+            return res.redirect(redirectUrl);
 
         } else {
             await Payment.findOneAndUpdate(
@@ -357,10 +417,13 @@ export const vnpayReturn = async (req, res) => {
                 { status: "failed" }
             );
 
-            return res.json({
-                status: "fail",
-                message: "Thanh toán thất bại!",
+            // Cập nhật order payment_status = "failed"
+            await Order.findByIdAndUpdate(orderId, {
+                payment_status: "failed",
             });
+
+            const redirectUrl = `http://localhost:5173/payment-success?orderId=${orderId}&status=failed`;
+            return res.redirect(redirectUrl);
         }
     } catch (error) {
         return res.status(500).json({
