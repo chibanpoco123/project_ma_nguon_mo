@@ -69,6 +69,9 @@ export const createOrder = async (req, res) => {
       payment_method,
       shipping_method,
       customer_note,
+      // ✅ Với COD, tự động set payment_status = "paid" (vì thanh toán khi nhận hàng)
+      // Với VNPAY/MOMO sẽ được cập nhật sau khi thanh toán thành công
+      payment_status: payment_method === "COD" ? "paid" : "pending",
     });
 
     await newOrder.save();
@@ -239,7 +242,17 @@ export const getAllOrders = async (req, res) => {
 
     const orders = await Order.find(query) // Thêm query vào đây
       .populate("user_id", "name email")
+      .populate("items.product_id", "name images price") // Populate thông tin sản phẩm
       .sort({ created_at: -1 });
+
+    console.log(`📦 [getAllOrders] Found ${orders.length} orders`);
+    if (orders.length > 0 && orders[0].items) {
+      console.log(`📦 [getAllOrders] First order has ${orders[0].items.length} items`);
+      if (orders[0].items[0]) {
+        console.log(`📦 [getAllOrders] First item product_id type:`, typeof orders[0].items[0].product_id);
+        console.log(`📦 [getAllOrders] First item product_id:`, orders[0].items[0].product_id);
+      }
+    }
 
     res.json(orders);
   } catch (error) {

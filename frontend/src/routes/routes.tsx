@@ -11,6 +11,7 @@ import AdminProducts from '../components/admin/AdminProducts';
 import AdminDatabase from '../components/admin/AdminDatabase';
 import AdminUsers from '../components/admin/AdminUsers';
 import AdminDebug from '../components/admin/AdminDebug';
+import AdminReviews from '../components/admin/AdminReviews';
 import ProtectedRoute from '../components/admin/ProtectedRoute';
 import Checkout from '../components/page/checkout';
 import AdminCategoryList from '../components/admin/AdminCategories';
@@ -22,6 +23,7 @@ import AllProducts from '../components/page/AllProducts';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import Profile from '../components/page/Profile';
+import PaymentSuccess from '../components/page/PaymentSuccess';
 
 
 // 🔥 1. THÊM DÒNG IMPORT NÀY
@@ -73,6 +75,7 @@ function AppRoutes() {
       <Route path="/search" element={<SearchResultsPage />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/checkout" element={<Checkout />} />
+      <Route path="/payment-success" element={<PaymentSuccess />} />
       <Route path="/debug" element={<AdminDebug />} />
 
       {/* PRODUCT DETAIL */}
@@ -167,6 +170,7 @@ function AppRoutes() {
       >
         <Route index element={<AdminDashboard />} />
         <Route path="products" element={<AdminProducts />} />
+        <Route path="reviews" element={<AdminReviews />} />
         <Route path="categories" element={<AdminCategoryList />} />
 
         

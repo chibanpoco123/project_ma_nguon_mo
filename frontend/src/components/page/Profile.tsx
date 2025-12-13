@@ -10,6 +10,7 @@ import PaymentMethods from './profile/PaymentMethods';
 import OrderHistory from './profile/OrderHistory';
 import MembershipLevel from './profile/MembershipLevel';
 import AccountSettings from './profile/AccountSettings';
+import PurchasedProductsForReview from '../PurchasedProductsForReview';
 
 interface ShippingAddress {
   _id?: string;
@@ -248,6 +249,10 @@ const Profile: React.FC = () => {
 
         <Tab eventKey="orders" title="Lịch sử mua sắm">
           <OrderHistory />
+        </Tab>
+
+        <Tab eventKey="reviews" title="Sản phẩm đã mua - Đánh giá">
+          <PurchasedProductsForReview />
         </Tab>
 
         <Tab eventKey="membership" title="Cấp độ thành viên">

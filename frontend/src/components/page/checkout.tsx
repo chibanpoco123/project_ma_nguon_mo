@@ -218,17 +218,17 @@ const handlePayment = async () => {
   }
 
   // -------------------------------------------------------
-  // 🔥 3. COD → Xóa giỏ
+  // 🔥 3. COD → Đã thanh toán (payment_status đã được set = "paid" ở backend)
   // -------------------------------------------------------
 
-  alert("Đặt hàng thành công!");
+  alert("Đặt hàng thành công! Đơn hàng của bạn đã được xác nhận.");
   if (!buyNowItem) {
     await axios.delete("http://localhost:3000/api/cart/clear/all", {
       headers: { Authorization: `Bearer ${token}` },
     });
   }
 
-  navigate("/");
+  navigate("/profile"); // Chuyển về profile để xem đơn hàng
 };
 
 
