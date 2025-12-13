@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useLocation } from 'react-router-dom';
 import '../../css/ProductDetail.css';
 import axios from "axios";
 import { useNavigate } from 'react-router-dom';
+import ProductReviews from '../ProductReviews';
+import ErrorBoundary from '../ErrorBoundary';
 interface Product {
   _id: string;
   name: string;
@@ -16,12 +18,20 @@ interface Product {
 
 const ProductDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const location = useLocation();
   const [productData, setProductData] = useState<Product | null>(null);
   const [selectedSize, setSelectedSize] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState('MÔ TẢ');
   const [mainImage, setMainImage] = useState<string>("");
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
   const navigate = useNavigate();
+
+  // Kiểm tra nếu có state từ PurchasedProductsForReview
+  useEffect(() => {
+    if (location.state && (location.state as any).showReviewTab) {
+      setActiveTab('ĐÁNH GIÁ');
+    }
+  }, [location.state]);
   const handleAddToCart = async () => {
   if (!productData) return;
 
@@ -203,6 +213,12 @@ const handleBuyNow = () => {
           MÔ TẢ
         </button>
         <button
+          className={`product-description__tab-button ${activeTab === "ĐÁNH GIÁ" ? "active" : ""}`}
+          onClick={() => setActiveTab("ĐÁNH GIÁ")}
+        >
+          ĐÁNH GIÁ
+        </button>
+        <button
           className={`product-description__tab-button ${activeTab === "ĐỔI HÀNG" ? "active" : ""}`}
           onClick={() => setActiveTab("ĐỔI HÀNG")}
         >
@@ -211,6 +227,11 @@ const handleBuyNow = () => {
       </div>
       <div className="product-description__content">
         {activeTab === "MÔ TẢ" && productData.description}
+        {activeTab === "ĐÁNH GIÁ" && id && (
+          <ErrorBoundary>
+            <ProductReviews productId={id} />
+          </ErrorBoundary>
+        )}
         {activeTab === "ĐỔI HÀNG" && "Chi tiết chính sách đổi hàng..."}
       </div>
     </div>
