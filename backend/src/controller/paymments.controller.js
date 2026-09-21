@@ -338,7 +338,7 @@ export const createVNPayPayment = async (req, res) => {
         const paymentUrl = vnpay.buildPaymentUrl({
             vnp_Amount: amount,
             vnp_IpAddr: ipAddr,
-            vnp_ReturnUrl: "http://localhost:3000/api/payments/vnpay/return",
+            vnp_ReturnUrl: "https://project-ma-nguon-mo-3.onrender.com/api/payments/vnpay/return",
             vnp_TxnRef: orderId, // 🔥 TRUYỀN ORDER ID THẬT LUÔN
             vnp_OrderInfo: `Thanh toán đơn hàng #${orderId}`,
         });

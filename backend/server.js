@@ -22,7 +22,7 @@ const app = express();
 const server = http.createServer(app);   // 👈 Dùng http.createServer
 const io = new Server(server, {          // 👈 Tạo Socket server
   cors: {
-    origin: ["http://localhost:5173", "http://localhost:5174", "http://localhost:3000"],
+    origin: ["http://localhost:5173", "http://localhost:5174", "https://project-ma-nguon-mo-3.onrender.com/api"],
     credentials: true,
   },
 });
@@ -30,7 +30,7 @@ const io = new Server(server, {          // 👈 Tạo Socket server
 const PORT = process.env.PORT || 5000;
 
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:3000'],
+  origin: ['http://localhost:5173', 'http://localhost:5174', 'https://project-ma-nguon-mo-3.onrender.com/api'],
   credentials: true
 }));
 
