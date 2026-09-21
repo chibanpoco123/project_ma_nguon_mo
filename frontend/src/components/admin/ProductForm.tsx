@@ -161,7 +161,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
       
       // Update chỉ field is_new để tránh conflict
       const response = await axios.put(
-        `http://localhost:3000/api/products/${product._id}`,
+        `https://project-ma-nguon-mo-3.onrender.com/api/api/products/${product._id}`,
         { is_new: isNew },
         { headers }
       );
@@ -257,7 +257,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
 
     const token = localStorage.getItem('accessToken');
     const response = await axios.post(
-      'http://localhost:3000/api/products/upload',
+      'https://project-ma-nguon-mo-3.onrender.com/api/api/products/upload',
       formData,
       {
         headers: {
@@ -267,7 +267,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
       }
     );
 
-    return response.data.images.map((img: string) => `http://localhost:3000${img}`);
+    return response.data.images.map((img: string) => `https://project-ma-nguon-mo-3.onrender.com/api${img}`);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -328,14 +328,14 @@ const ProductForm: React.FC<ProductFormProps> = ({
       if (product) {
         // Update existing product
         await axios.put(
-          `http://localhost:3000/api/products/${product._id}`,
+          `https://project-ma-nguon-mo-3.onrender.com/api/api/products/${product._id}`,
           submitData,
           { headers }
         );
       } else {
         // Create new product
         await axios.post(
-          'http://localhost:3000/api/products',
+          'https://project-ma-nguon-mo-3.onrender.com/api/api/products',
           submitData,
           { headers }
         );

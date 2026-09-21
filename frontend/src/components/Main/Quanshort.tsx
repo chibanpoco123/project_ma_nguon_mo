@@ -26,7 +26,7 @@ const ShortsSection: React.FC = () => {
     const fetchShorts = async () => {
       try {
         const res = await fetch(
-          `http://localhost:3000/api/products?category_id=${QUAN_SHORT_ID}`
+          `https://project-ma-nguon-mo-3.onrender.com/api/api/products?category_id=${QUAN_SHORT_ID}`
         );
         const data = await res.json();
 

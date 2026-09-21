@@ -25,7 +25,7 @@ const NewArri: React.FC = () => {
     useEffect(() => {
         const fetchProducts = async () => {
             try {
-                const res = await fetch(`http://localhost:3000/api/products?category_id=${AO_THUN_ID}`);
+                const res = await fetch(`https://project-ma-nguon-mo-3.onrender.com/api/api/products?category_id=${AO_THUN_ID}`);
                 const data = await res.json();
 
                 if (Array.isArray(data)) {

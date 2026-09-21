@@ -31,7 +31,7 @@ const OutletPage: React.FC = () => {
       try {
         setLoading(true);
         // Lấy tất cả sản phẩm
-        const response = await axios.get('http://localhost:3000/api/products/');
+        const response = await axios.get('https://project-ma-nguon-mo-3.onrender.com/api/api/products/');
         const allProducts = response.data;
         
         // Lọc chỉ lấy sản phẩm có discount > 0
@@ -62,7 +62,7 @@ const OutletPage: React.FC = () => {
   const getImageUrl = (img: string | undefined) => {
     if (!img) return '/no-image.png';
     if (img.startsWith('http')) return img;
-    return `http://localhost:3000/${img}`;
+    return `https://project-ma-nguon-mo-3.onrender.com/api/${img}`;
   };
 
   const formatPrice = (price: number) => {

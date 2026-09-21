@@ -55,7 +55,7 @@ node server.js
 Sau khi khởi động, bạn sẽ thấy thông báo:
 ```
 ✅ Kết nối MongoDB Atlas thành công!
-🚀 Server chạy tại: http://localhost:3000
+🚀 Server chạy tại: https://project-ma-nguon-mo-3.onrender.com/api
 ```
 
 ## 5. Kiểm tra field `is_new` trong Database

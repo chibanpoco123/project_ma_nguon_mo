@@ -54,7 +54,7 @@ const ProductReviews: React.FC<ProductReviewsProps> = ({ productId }) => {
   const fetchStatistics = async () => {
     try {
       console.log('📊 [ProductReviews] Fetching statistics for productId:', productId);
-      const res = await axios.get(`http://localhost:3000/api/reviews/${productId}/statistics`);
+      const res = await axios.get(`https://project-ma-nguon-mo-3.onrender.com/api/reviews/${productId}/statistics`);
       console.log('✅ [ProductReviews] Statistics response:', res.data);
       setStatistics(res.data);
     } catch (err: any) {
@@ -80,7 +80,7 @@ const ProductReviews: React.FC<ProductReviewsProps> = ({ productId }) => {
       if (filterHasMedia) params.hasMedia = 'true';
 
       console.log('📝 [ProductReviews] Fetching reviews for productId:', productId, 'with params:', params);
-      const res = await axios.get(`http://localhost:3000/api/reviews/${productId}`, { params });
+      const res = await axios.get(`https://project-ma-nguon-mo-3.onrender.com/api/reviews/${productId}`, { params });
       console.log('✅ [ProductReviews] Reviews response:', res.data);
       
       // Xử lý response có thể là array hoặc object với message
@@ -138,7 +138,7 @@ const ProductReviews: React.FC<ProductReviewsProps> = ({ productId }) => {
 
     try {
       await axios.post(
-        `http://localhost:3000/api/reviews/${reviewId}/like`,
+        `https://project-ma-nguon-mo-3.onrender.com/api/api/reviews/${reviewId}/like`,
         {},
         {
           headers: { Authorization: `Bearer ${token}` }

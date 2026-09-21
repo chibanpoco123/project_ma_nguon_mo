@@ -47,8 +47,8 @@ const AdminProducts: React.FC = () => {
   const [filterIsNew, setFilterIsNew] = useState<string>('all'); // 'all', 'new', 'not-new'
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
-  const API_URL = 'http://localhost:3000/api/products';
-  const CATEGORIES_URL = 'http://localhost:3000/api/categories';
+  const API_URL = 'https://project-ma-nguon-mo-3.onrender.com/api/api/products';
+  const CATEGORIES_URL = 'https://project-ma-nguon-mo-3.onrender.com/api/api/categories';
 
   // Get auth token
   const getAuthHeaders = () => {

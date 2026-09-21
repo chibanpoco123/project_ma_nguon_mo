@@ -38,7 +38,7 @@ const AdminOrder: React.FC = () => {
 
   // ✅ CẤU HÌNH QUAN TRỌNG: Trỏ thẳng sang cổng 3000 của Backend
   // Web bạn chạy ở 5173 nhưng sẽ gọi dữ liệu từ 3000 -> Điều này hoàn toàn đúng.
-  const API_BASE_URL = 'http://localhost:3000/api/Order';
+  const API_BASE_URL = 'https://project-ma-nguon-mo-3.onrender.com/api/api/Order';
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {

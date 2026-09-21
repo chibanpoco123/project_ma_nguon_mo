@@ -32,7 +32,7 @@ const AdminUsers: React.FC = () => {
   const [filterRole, setFilterRole] = useState<string>('all');
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
-  const API_URL = 'http://localhost:3000/api/users';
+  const API_URL = 'https://project-ma-nguon-mo-3.onrender.com/api/api/users';
 
   // Get auth token
   const getAuthHeaders = () => {

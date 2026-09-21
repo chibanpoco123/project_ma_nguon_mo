@@ -90,7 +90,7 @@
 if (product) {
   // Update existing product
   await axios.put(
-    `http://localhost:3000/api/products/${product._id}`, // ← ID của product
+    `https://project-ma-nguon-mo-3.onrender.com/api/products/${product._id}`, // ← ID của product
     submitData, // ← Dữ liệu đã chỉnh sửa
     { headers }
   );
@@ -200,10 +200,10 @@ db.products.find().sort({ updated_at: -1 }).limit(10)
 ### Option 3: API Endpoint
 ```bash
 # Lấy danh sách products
-GET http://localhost:3000/api/products
+GET https://project-ma-nguon-mo-3.onrender.com/api/products
 
 # Lấy chi tiết 1 product
-GET http://localhost:3000/api/products/:id
+GET https://project-ma-nguon-mo-3.onrender.com/api/products/:id
 ```
 
 ---

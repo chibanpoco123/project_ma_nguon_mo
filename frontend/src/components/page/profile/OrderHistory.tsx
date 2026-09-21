@@ -43,7 +43,7 @@ const OrderHistory: React.FC = () => {
       try {
         const token = tokenManager.getAccessToken();
         if (!token) return;
-        const res = await axios.get("http://localhost:3000/api/orders", {
+        const res = await axios.get("https://project-ma-nguon-mo-3.onrender.com/api/api/orders", {
           headers: { Authorization: `Bearer ${token}` },
         });
         const fetchedOrders = res.data || [];
