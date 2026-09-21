@@ -53,7 +53,7 @@ const ProductDetail: React.FC = () => {
 
   try {
     const res = await axios.post(
-      "https://project-ma-nguon-mo-3.onrender.com/apicart/add",
+      "https://project-ma-nguon-mo-3.onrender.com/api/cart/add",
       {
         product_id: productData._id,
         quantity,
@@ -87,7 +87,7 @@ const ProductDetail: React.FC = () => {
 
   const fetchProduct = async () => {
     try {
-      const res = await fetch(`https://project-ma-nguon-mo-3.onrender.com/apiproducts/${id}`);
+      const res = await fetch(`https://project-ma-nguon-mo-3.onrender.com/api/products/${id}`);
       const data = await res.json();
 
       const formattedData: Product = {
@@ -150,7 +150,7 @@ const handleBuyNow = () => {
   // -------------------------
   const fetchRelated = async (categoryId: string) => {
     try {
-      const res = await fetch(`https://project-ma-nguon-mo-3.onrender.com/apiproducts?category_id=${categoryId}`);
+      const res = await fetch(`https://project-ma-nguon-mo-3.onrender.com/api/products?category_id=${categoryId}`);
       const data = await res.json();
 
       if (Array.isArray(data)) {

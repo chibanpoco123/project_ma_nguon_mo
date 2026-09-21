@@ -32,7 +32,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ productId, productVariantId, on
 
       try {
         const res = await axios.get(
-          `https://project-ma-nguon-mo-3.onrender.com/apireviews/${productId}/can-review`,
+          `https://project-ma-nguon-mo-3.onrender.com/api/reviews/${productId}/can-review`,
           {
             headers: { Authorization: `Bearer ${token}` }
           }
@@ -77,7 +77,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ productId, productVariantId, on
 
     try {
       await axios.post(
-        'https://project-ma-nguon-mo-3.onrender.com/apireviews',
+        'https://project-ma-nguon-mo-3.onrender.com/api/reviews',
         {
           product_id: productId,
           product_variant_id: productVariantId || null,

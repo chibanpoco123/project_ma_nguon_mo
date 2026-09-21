@@ -41,7 +41,7 @@ const PurchasedProductsForReview: React.FC = () => {
       console.log('🔍 Fetching purchased products...');
       
       const res = await axios.get(
-        'https://project-ma-nguon-mo-3.onrender.com/api/reviews/purchased/for-review',
+        'https://project-ma-nguon-mo-3.onrender.com/api//reviews/purchased/for-review',
         {
           headers: { Authorization: `Bearer ${token}` }
         }
@@ -59,7 +59,7 @@ const PurchasedProductsForReview: React.FC = () => {
       console.error('❌ Error response:', err.response);
       console.error('❌ Error status:', err.response?.status);
       console.error('❌ Error data:', err.response?.data);
-      console.error('❌ Request URL:', 'https://project-ma-nguon-mo-3.onrender.com/apireviews/purchased/for-review');
+      console.error('❌ Request URL:', 'https://project-ma-nguon-mo-3.onrender.com/api/reviews/purchased/for-review');
       
       if (err.response?.status === 401) {
         setError('Bạn cần đăng nhập để xem sản phẩm đã mua');

@@ -43,7 +43,7 @@ const PersonalInfo: React.FC<PersonalInfoProps> = ({ user, onUpdate }) => {
     try {
       const token = tokenManager.getAccessToken();
       const res = await axios.put(
-        `https://project-ma-nguon-mo-3.onrender.com/apiusers/${user._id}`,
+        `https://project-ma-nguon-mo-3.onrender.com/api/users/${user._id}`,
         formData,
         { headers: { Authorization: `Bearer ${token}` } }
       );

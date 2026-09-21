@@ -38,7 +38,7 @@ const getImage = (url: string | undefined | null) => {
   }
 
   if (url.includes("uploads")) {
-    return "https://project-ma-nguon-mo-3.onrender.com/api/" + url.replace(/\\/g, "/").replace("public/", "");
+    return "https://project-ma-nguon-mo-3.onrender.com/api//" + url.replace(/\\/g, "/").replace("public/", "");
   }
 
   if (url.includes("assets")) {
@@ -90,7 +90,7 @@ const Checkout: React.FC = () => {
 
     const token = localStorage.getItem("accessToken");
     axios
-      .get("https://project-ma-nguon-mo-3.onrender.com/apicart/", {
+      .get("https://project-ma-nguon-mo-3.onrender.com/api/cart/", {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => {
@@ -162,7 +162,7 @@ const handlePayment = async () => {
 
   // 🔥 1. TẠO ORDER TRƯỚC
   const orderRes = await axios.post(
-    "https://project-ma-nguon-mo-3.onrender.com/apiorder/",
+    "https://project-ma-nguon-mo-3.onrender.com/api/order/",
     {
       customer_name: customerName,
       customer_phone: customerPhone,
@@ -189,7 +189,7 @@ const handlePayment = async () => {
 
   if (payment === "VNPAY") {
     const res = await axios.post(
-      "https://project-ma-nguon-mo-3.onrender.com/apipayments/vnpay/create",
+      "https://project-ma-nguon-mo-3.onrender.com/api/payments/vnpay/create",
       {
         amount: subtotal,
         paymentCode: "VNPAY",
@@ -204,7 +204,7 @@ const handlePayment = async () => {
 
   if (payment === "MOMO") {
     const res = await axios.post(
-      "https://project-ma-nguon-mo-3.onrender.com/apipayments/momo",
+      "https://project-ma-nguon-mo-3.onrender.com/api/payments/momo",
       {
         amount: subtotal,
         paymentCode: "MOMO",
@@ -223,7 +223,7 @@ const handlePayment = async () => {
 
   alert("Đặt hàng thành công! Đơn hàng của bạn đã được xác nhận.");
   if (!buyNowItem) {
-    await axios.delete("https://project-ma-nguon-mo-3.onrender.com/apicart/clear/all", {
+    await axios.delete("https://project-ma-nguon-mo-3.onrender.com/api/cart/clear/all", {
       headers: { Authorization: `Bearer ${token}` },
     });
   }

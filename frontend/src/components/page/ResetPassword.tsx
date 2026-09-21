@@ -72,7 +72,7 @@ const ResetPasswordPage: React.FC = () => {
     try {
       console.log("🔄 Gửi reset password request");
 
-      const res = await axios.post("https://project-ma-nguon-mo-3.onrender.com/apiusers/reset-password", {
+      const res = await axios.post("https://project-ma-nguon-mo-3.onrender.com/api/users/reset-password", {
         token,
         password,
         confirmPassword,

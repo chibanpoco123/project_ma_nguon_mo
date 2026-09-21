@@ -34,7 +34,7 @@ const MenShirt: React.FC = () => {
     const fetchProducts = async () => {
       try {
         setLoading(true);
-        let url = 'https://project-ma-nguon-mo-3.onrender.com/apiproducts/';
+        let url = 'https://project-ma-nguon-mo-3.onrender.com/api/products/';
         
         // If a specific category is selected, filter by it
         if (selectedCategory !== 'all') {
@@ -89,7 +89,7 @@ const MenShirt: React.FC = () => {
   const getImageUrl = (img: string | undefined) => {
     if (!img) return '/no-image.png';
     if (img.startsWith('http')) return img;
-    return `https://project-ma-nguon-mo-3.onrender.com/api/${img}`;
+    return `https://project-ma-nguon-mo-3.onrender.com/api//${img}`;
   };
 
   const formatPrice = (price: number, discount?: number) => {

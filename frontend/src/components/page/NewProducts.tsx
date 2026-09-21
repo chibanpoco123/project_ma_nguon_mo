@@ -31,7 +31,7 @@ const NewProducts: React.FC = () => {
       try {
         setLoading(true);
         // Chỉ lấy sản phẩm có is_new === true
-        const response = await axios.get('https://project-ma-nguon-mo-3.onrender.com/apiproducts/?is_new=true');
+        const response = await axios.get('https://project-ma-nguon-mo-3.onrender.com/api/products/?is_new=true');
         const allProducts = response.data;
         
         // Lọc lại để đảm bảo chỉ có sản phẩm is_new === true (nếu có lỗi từ backend)
@@ -59,7 +59,7 @@ const NewProducts: React.FC = () => {
   const getImageUrl = (img: string | undefined) => {
     if (!img) return '/no-image.png';
     if (img.startsWith('http')) return img;
-    return `https://project-ma-nguon-mo-3.onrender.com/api/${img}`;
+    return `https://project-ma-nguon-mo-3.onrender.com/api//${img}`;
   };
 
   const formatPrice = (price: number, discount?: number) => {

@@ -94,7 +94,7 @@ const AdminReviews: React.FC = () => {
       if (filters.search) params.search = filters.search;
 
       const res = await axios.get(
-        'https://project-ma-nguon-mo-3.onrender.com/apireviews/admin/all',
+        'https://project-ma-nguon-mo-3.onrender.com/api/reviews/admin/all',
         {
           headers: { Authorization: `Bearer ${token}` },
           params
@@ -118,7 +118,7 @@ const AdminReviews: React.FC = () => {
 
     try {
       const res = await axios.get(
-        'https://project-ma-nguon-mo-3.onrender.com/apireviews/admin/statistics',
+        'https://project-ma-nguon-mo-3.onrender.com/api/reviews/admin/statistics',
         {
           headers: { Authorization: `Bearer ${token}` }
         }
@@ -135,7 +135,7 @@ const AdminReviews: React.FC = () => {
 
     try {
       await axios.put(
-        `https://project-ma-nguon-mo-3.onrender.com/apireviews/admin/${reviewId}/visibility`,
+        `https://project-ma-nguon-mo-3.onrender.com/api/reviews/admin/${reviewId}/visibility`,
         { is_hidden: !currentStatus },
         {
           headers: { Authorization: `Bearer ${token}` }
@@ -157,7 +157,7 @@ const AdminReviews: React.FC = () => {
 
     try {
       await axios.delete(
-        `https://project-ma-nguon-mo-3.onrender.com/apireviews/admin/${reviewId}`,
+        `https://project-ma-nguon-mo-3.onrender.com/api/reviews/admin/${reviewId}`,
         {
           headers: { Authorization: `Bearer ${token}` }
         }
