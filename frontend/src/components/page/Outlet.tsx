@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, Button } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import '../../assets/css/Outlet.css';
+import '../../assets/css/outlet.css';
 import Header from '../Header';
 import Footer from '../Footer';
 
