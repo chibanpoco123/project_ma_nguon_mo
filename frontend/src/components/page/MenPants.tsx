@@ -33,7 +33,7 @@ const MenPants: React.FC = () => {
     const fetchProducts = async () => {
       try {
         setLoading(true);
-        let url = 'https://project-ma-nguon-mo-3.onrender.com/api/api/products/';
+        let url = 'https://project-ma-nguon-mo-3.onrender.com/apiproducts/';
         
         // If a specific category is selected, filter by it
         if (selectedCategory !== 'all') {

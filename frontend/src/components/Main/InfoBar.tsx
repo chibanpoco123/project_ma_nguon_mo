@@ -18,7 +18,7 @@ function InfoBar() {
   useEffect(() => {
     const fetchCoupons = async () => {
       try {
-        const res = await axios.get('https://project-ma-nguon-mo-3.onrender.com/api/api/coupons');
+        const res = await axios.get('https://project-ma-nguon-mo-3.onrender.com/apicoupons');
         if (res.data && Array.isArray(res.data)) {
           setVouchers(res.data);
         } else if (res.data.data && Array.isArray(res.data.data)) {

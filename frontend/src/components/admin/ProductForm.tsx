@@ -161,7 +161,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
       
       // Update chỉ field is_new để tránh conflict
       const response = await axios.put(
-        `https://project-ma-nguon-mo-3.onrender.com/api/api/products/${product._id}`,
+        `https://project-ma-nguon-mo-3.onrender.com/apiproducts/${product._id}`,
         { is_new: isNew },
         { headers }
       );
@@ -257,7 +257,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
 
     const token = localStorage.getItem('accessToken');
     const response = await axios.post(
-      'https://project-ma-nguon-mo-3.onrender.com/api/api/products/upload',
+      'https://project-ma-nguon-mo-3.onrender.com/apiproducts/upload',
       formData,
       {
         headers: {
@@ -328,14 +328,14 @@ const ProductForm: React.FC<ProductFormProps> = ({
       if (product) {
         // Update existing product
         await axios.put(
-          `https://project-ma-nguon-mo-3.onrender.com/api/api/products/${product._id}`,
+          `https://project-ma-nguon-mo-3.onrender.com/apiproducts/${product._id}`,
           submitData,
           { headers }
         );
       } else {
         // Create new product
         await axios.post(
-          'https://project-ma-nguon-mo-3.onrender.com/api/api/products',
+          'https://project-ma-nguon-mo-3.onrender.com/apiproducts',
           submitData,
           { headers }
         );

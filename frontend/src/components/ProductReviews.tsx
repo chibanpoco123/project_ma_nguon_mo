@@ -138,7 +138,7 @@ const ProductReviews: React.FC<ProductReviewsProps> = ({ productId }) => {
 
     try {
       await axios.post(
-        `https://project-ma-nguon-mo-3.onrender.com/api/api/reviews/${reviewId}/like`,
+        `https://project-ma-nguon-mo-3.onrender.com/apireviews/${reviewId}/like`,
         {},
         {
           headers: { Authorization: `Bearer ${token}` }

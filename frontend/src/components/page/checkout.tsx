@@ -90,7 +90,7 @@ const Checkout: React.FC = () => {
 
     const token = localStorage.getItem("accessToken");
     axios
-      .get("https://project-ma-nguon-mo-3.onrender.com/api/api/cart/", {
+      .get("https://project-ma-nguon-mo-3.onrender.com/apicart/", {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => {
@@ -162,7 +162,7 @@ const handlePayment = async () => {
 
   // 🔥 1. TẠO ORDER TRƯỚC
   const orderRes = await axios.post(
-    "https://project-ma-nguon-mo-3.onrender.com/api/api/order/",
+    "https://project-ma-nguon-mo-3.onrender.com/apiorder/",
     {
       customer_name: customerName,
       customer_phone: customerPhone,
@@ -189,7 +189,7 @@ const handlePayment = async () => {
 
   if (payment === "VNPAY") {
     const res = await axios.post(
-      "https://project-ma-nguon-mo-3.onrender.com/api/api/payments/vnpay/create",
+      "https://project-ma-nguon-mo-3.onrender.com/apipayments/vnpay/create",
       {
         amount: subtotal,
         paymentCode: "VNPAY",
@@ -204,7 +204,7 @@ const handlePayment = async () => {
 
   if (payment === "MOMO") {
     const res = await axios.post(
-      "https://project-ma-nguon-mo-3.onrender.com/api/api/payments/momo",
+      "https://project-ma-nguon-mo-3.onrender.com/apipayments/momo",
       {
         amount: subtotal,
         paymentCode: "MOMO",
@@ -223,7 +223,7 @@ const handlePayment = async () => {
 
   alert("Đặt hàng thành công! Đơn hàng của bạn đã được xác nhận.");
   if (!buyNowItem) {
-    await axios.delete("https://project-ma-nguon-mo-3.onrender.com/api/api/cart/clear/all", {
+    await axios.delete("https://project-ma-nguon-mo-3.onrender.com/apicart/clear/all", {
       headers: { Authorization: `Bearer ${token}` },
     });
   }

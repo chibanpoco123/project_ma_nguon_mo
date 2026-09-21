@@ -31,7 +31,7 @@ const AdminDatabase: React.FC = () => {
   const [error, setError] = useState<string>('');
   const [refreshing, setRefreshing] = useState(false);
 
-  const API_URL = 'https://project-ma-nguon-mo-3.onrender.com/api/api/admin';
+  const API_URL = 'https://project-ma-nguon-mo-3.onrender.com/apiadmin';
 
   const getAuthHeaders = () => {
     const token = localStorage.getItem('accessToken');

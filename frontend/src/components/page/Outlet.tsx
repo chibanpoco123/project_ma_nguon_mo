@@ -31,7 +31,7 @@ const OutletPage: React.FC = () => {
       try {
         setLoading(true);
         // Lấy tất cả sản phẩm
-        const response = await axios.get('https://project-ma-nguon-mo-3.onrender.com/api/api/products/');
+        const response = await axios.get('https://project-ma-nguon-mo-3.onrender.com/apiproducts/');
         const allProducts = response.data;
         
         // Lọc chỉ lấy sản phẩm có discount > 0
