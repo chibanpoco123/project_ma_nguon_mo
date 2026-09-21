@@ -14,7 +14,7 @@ export const googleCallback = async (req, res) => {
     console.log("🔵 Google callback received:", JSON.stringify(req.body, null, 2));
 
     const { credential } = req.body;
-
+ 
     if (!credential) {
       return res.status(400).json({ message: "Không nhận được credential từ Google" });
     }

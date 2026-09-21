@@ -67,7 +67,6 @@ const ProductDetail: React.FC = () => {
     );
 
     console.log("Add to cart response:", res.data);
-
     alert("Đã thêm vào giỏ hàng!");
     navigate("/cart");
 
@@ -76,10 +75,6 @@ const ProductDetail: React.FC = () => {
     alert("Không thể thêm vào giỏ hàng!");
   }
 };
-
-  // -------------------------
-  // LẤY SẢN PHẨM THEO ID
-  // -------------------------
  useEffect(() => {
   if (!id) return;
 

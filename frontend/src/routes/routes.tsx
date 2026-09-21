@@ -74,7 +74,11 @@ function AppRoutes() {
       <Route path="/outlet" element={<OutletPage />} />
       <Route path="/search" element={<SearchResultsPage />} />
       <Route path="/reset-password" element={<ResetPassword />} />
-      <Route path="/checkout" element={<Checkout />} />
+      <Route path="/checkout" element={ <>
+            <Header />
+            <Checkout />
+            <Footer />
+          </>} />
       <Route path="/payment-success" element={<PaymentSuccess />} />
       <Route path="/debug" element={<AdminDebug />} />
 

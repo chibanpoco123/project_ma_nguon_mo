@@ -80,8 +80,6 @@ export const loginUser = async (req, res) => {
     if (!email || !password) {
       return res.status(400).json({ message: "Email và mật khẩu là bắt buộc" });
     }
-
-    // Normalize email (lowercase và trim)
     const normalizedEmail = email.toLowerCase().trim();
     
     const user = await User.findOne({ email: normalizedEmail });

@@ -2,23 +2,18 @@ import React, { useState, useCallback, useEffect } from "react";
 import "../../assets/css/login.css";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-
 import tokenManager from "../../utils/tokenManager";
 import ForgotPasswordModal from "../ForgotPasswordModal";
-
 interface GoogleAccount {
   initialize: (config: Record<string, unknown>) => void;
   renderButton: (element: HTMLElement, config: Record<string, unknown>) => void;
 }
-
 interface GoogleAccounts {
   id: GoogleAccount;
 }
-
 interface GoogleWindow {
   accounts: GoogleAccounts;
 }
-
 declare global {
   interface Window {
     FB?: {
@@ -28,13 +23,11 @@ declare global {
     };
   }
 }
-
 interface FacebookResponse {
   authResponse?: {
     accessToken: string;
   };
 }
-
 interface FacebookUserInfo {
   id: string;
   email: string;
@@ -45,7 +38,6 @@ interface FacebookUserInfo {
     };
   };
 }
-
 declare global {
   interface Window {
     google?: GoogleWindow;
@@ -57,8 +49,6 @@ declare global {
     fbAsyncInit?: () => void;
   }
 }
-
-
 const LoginPage: React.FC = () => {
   const [isLoginTab, setIsLoginTab] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
@@ -406,5 +396,4 @@ const handleGoogleResponse = useCallback(
     </div>
   );
 };
-
 export default LoginPage;

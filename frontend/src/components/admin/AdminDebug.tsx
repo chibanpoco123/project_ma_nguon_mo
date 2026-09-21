@@ -17,7 +17,6 @@ const AdminDebug: React.FC = () => {
     } catch (e) {
       console.error('Error parsing user:', e);
     }
-
     const info = {
       hasToken: !!token,
       tokenLength: token?.length || 0,
@@ -39,7 +38,6 @@ const AdminDebug: React.FC = () => {
       <Alert variant="info" className="mt-3">
         <strong>Thông tin này giúp kiểm tra tại sao không thể truy cập trang admin</strong>
       </Alert>
-
       {debugInfo && (
         <Card className="mt-3">
           <Card.Header>

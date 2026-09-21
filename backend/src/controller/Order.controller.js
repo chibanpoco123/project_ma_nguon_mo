@@ -12,8 +12,6 @@ export const createOrder = async (req, res) => {
   try {
     const user_id = req.user.id;
     const order_number = generateOrderNumber();
-
-    // 🚀 LẤY ITEMS TỪ BODY (QUAN TRỌNG)
     const {
       items,
       customer_name,
@@ -33,7 +31,6 @@ export const createOrder = async (req, res) => {
       customer_note,
     } = req.body;
 
-    // ❌ Validate thiếu items
     if (!items || !Array.isArray(items) || items.length === 0) {
       return res
         .status(400)

@@ -307,8 +307,6 @@ export const createVNPayPayment = async (req, res) => {
         if (!userId) {
             return res.status(401).json({ message: "Không tìm thấy user từ token" });
         }
-
-        // LẤY ORDER ID TỪ FE
         const orderId = req.body.order_id;  // 🔥 DÙNG ORDER ID MONGO
         if (!orderId) {
             return res.status(400).json({ message: "Thiếu order_id từ FE" });
@@ -316,9 +314,7 @@ export const createVNPayPayment = async (req, res) => {
 
         // Tạo transaction tạm
         const tempTransactionId = "TRANS_" + Date.now();
-
         const amount = req.body.amount || 100000;
-
         // LƯU PAYMENT GẮN VỚI ORDER THẬT
         const newPayment = await Payment.create({
             order_id: orderId,
