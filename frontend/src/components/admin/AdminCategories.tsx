@@ -17,7 +17,7 @@ interface Category {
 const token = localStorage.getItem("accessToken");
 
 const axiosInstance = axios.create({
-  baseURL: "https://project-ma-nguon-mo-3.onrender.com/api//api",
+  baseURL: "https://project-ma-nguon-mo-3.onrender.com/api",
   headers: token ? { Authorization: `Bearer ${token}` } : {},
   withCredentials: true,
 });
